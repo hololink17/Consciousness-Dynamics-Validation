@@ -359,7 +359,7 @@ for (i in 1:n_clusters) {
 # 转换为数据框
 characteristics <- as.data.frame(result_list, stringsAsFactors = FALSE)
 # 保存
-write.csv(characteristics, file.path(results_dir, "Table1.csv"), row.names = FALSE)
+write.csv(characteristics, file.path(results_dir, "table1_cluster_demographics.csv"), row.names = FALSE)
 cat(" ✅ 聚类特征表已保存\n\n")
 # ============================================================================
 # 11. 四通路扩展分析
@@ -474,7 +474,7 @@ cat(sprintf("  Variance explained: %.2f%%\n", km_result$betweenss / km_result$to
 cat("\n四、Output Files\n")
 cat("  📊 Figure 1: Figure1.pdf\n")
 cat("  📊 Figure 2: figure2_cluster_heatmap.pdf\n")
-cat("  📋 Table 1: Table1.csv\n")
+cat("  📋 Table 1: table1_cluster_demographics.csv\n")
 cat("  📋 Table 2: cluster_naming.csv\n")
 cat("  📋 Table 3: risk_score_by_cluster.csv\n")
 cat("  📋 Table 4: outcome_by_cluster.csv\n")

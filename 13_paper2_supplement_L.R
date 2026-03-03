@@ -272,8 +272,8 @@ if (length(alpha_vars) > 0) {
   cat("\n【α因子均值】\n")
   print(alpha_by_cluster)
   # 保存结果（英文版）
-  write.csv(alpha_by_cluster, file.path(results_dir, "Table2.csv"), row.names = FALSE)
-  cat(" ✅ Table S2 saved: Table2.csv\n")
+  write.csv(alpha_by_cluster, file.path(results_dir, "table_S2_alpha_by_cluster.csv"), row.names = FALSE)
+  cat(" ✅ Table S2 saved: table_S2_alpha_by_cluster.csv\n")
   # 统计检验
   alpha_pvals <- data.frame()
   for (alpha in alpha_vars) {
@@ -495,9 +495,9 @@ cat("\n========================================================\n")
 cat("补充分析6：通路×HCF解读\n")
 cat("========================================================\n")
 if (file.exists(file.path(results_dir, "table_S1_cross_tab_percent.csv")) &&
-    file.exists(file.path(results_dir, "Table2.csv"))) {
+    file.exists(file.path(results_dir, "table_S2_alpha_by_cluster.csv"))) {
   cross_data <- read.csv(file.path(results_dir, "table_S1_cross_tab_percent.csv"))
-  alpha_data <- read.csv(file.path(results_dir, "Table2.csv"))
+  alpha_data <- read.csv(file.path(results_dir, "table_S2_alpha_by_cluster.csv"))
   interpretation <- data.frame(
     Pathway_Type = c("Low-hyperactivation", "Aversion-Exhaustion", "Perseveration", "Hyperactivation"),
     Psychological_Pct = c(38.0, 28.3, 32.5, 22.5),
@@ -537,8 +537,8 @@ cat("Total sample size:", nrow(high_risk_data), "\n")
 cat("Cluster distribution:\n")
 print(table(high_risk_data$pathway_cluster_en))
 cat("\n")
-if (file.exists(file.path(results_dir, "Table2.csv"))) {
-  alpha_tab <- read.csv(file.path(results_dir, "Table2.csv"))
+if (file.exists(file.path(results_dir, "table_S2_alpha_by_cluster.csv"))) {
+  alpha_tab <- read.csv(file.path(results_dir, "table_S2_alpha_by_cluster.csv"))
   cat("【Alpha Factors × Pathway】\n")
   print(alpha_tab)
   cat("\n")

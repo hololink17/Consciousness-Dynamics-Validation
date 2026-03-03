@@ -286,9 +286,9 @@ if("pathway_cluster" %in% names(data)) {
 cat("\n生成完整的Table 3（包含痴固着型均值）...\n")
 if(nrow(alpha_disease_results) > 0) {
   # 转换为宽格式
-  table3 <- alpha_disease_results %>%
-    select(System, Disease, Alpha_Factor, OR) %>%
-    pivot_wider(names_from = Alpha_Factor, values_from = OR, id_cols = c(System, Disease))
+table3 <- alpha_disease_results %>%
+  select(System, Disease, Alpha_Factor, OR) %>%
+  pivot_wider(names_from = Alpha_Factor, values_from = OR, id_cols = c(System, Disease))
   # 确保列名顺序一致
   expected_cols <- c("α₁ Metacognitive", "α₂ Emotional Regulation", 
                      "α₃ Systemic Coordination", "α₄ Goal Efficacy")
@@ -314,17 +314,32 @@ if(nrow(alpha_disease_results) > 0) {
   cat("⚠️ alpha_disease_results 为空，无法生成 Table 3\n")
 }
 # ============================================================================
-# 8. 分析2：α因子与健康结局的关联（原分析1保留）
+# 8. 分析2：α因子与所有健康结局的关联（包括高血压等）
 # ============================================================================
 cat("\n========================================================\n")
-cat("6. 分析2：α因子与健康结局的关联\n")
+cat("6. 分析2：α因子与所有健康结局的关联\n")
 cat("========================================================\n")
+# 定义所有结局（扩展版）
 outcomes <- list(
+  # 连续结局
   "phq9_total" = "PHQ-9 total (continuous)",
-  "depression" = "Depression (binary)",
-  "poor_self_rated_health" = "Poor self-rated health",
   "hs_crp_mgl" = "Inflammation (continuous)",
-  "BPXOPLS1" = "Resting heart rate"
+  "BPXOPLS1" = "Resting heart rate",
+  # 二元结局 - 心理健康
+  "depression" = "Depression (binary)",
+  "poor_self_rated_health" = "Poor self-rated health (binary)",
+  # 二元结局 - 心血管疾病
+  "hypertension" = "Hypertension (binary)",
+  "any_cvd" = "Cardiovascular disease (binary)",
+  "heart_failure" = "Heart failure (binary)",
+  "stroke" = "Stroke (binary)",
+  "heart_attack" = "Myocardial infarction (binary)",
+  # 二元结局 - 代谢疾病
+  "diabetes_doctor" = "Diabetes (binary)",
+  "obesity" = "Obesity (binary)",
+  "high_cholesterol_doctor" = "High cholesterol (binary)",
+  # 二元结局 - 肾脏疾病
+  "ckd_flag" = "CKD (binary)"
 )
 alpha_outcome_continuous <- data.frame()
 alpha_outcome_binary <- data.frame()
@@ -336,6 +351,7 @@ for(i in 1:length(outcomes)) {
     next
   }
   cat(sprintf("\n分析: %s\n", outcome_label))
+  # 根据结局类型选择设计对象
   if(outcome_name %in% c("hs_crp_mgl", "BPXOPLS1", "BMXBMI")) {
     current_design <- design_mec
   } else {
@@ -344,7 +360,11 @@ for(i in 1:length(outcomes)) {
   formula <- as.formula(paste0(outcome_name, " ~ ", 
                                 paste(alpha_vars, collapse = " + "),
                                 " + RIDAGEYR + RIAGENDR + DMDEDUC2 + INDFMPIR"))
-  if(outcome_name %in% c("depression", "poor_self_rated_health")) {
+  # 二元结局用逻辑回归
+  if(outcome_name %in% c("depression", "poor_self_rated_health", 
+                         "hypertension", "any_cvd", "heart_failure", 
+                         "stroke", "heart_attack", "diabetes_doctor",
+                         "obesity", "high_cholesterol_doctor", "ckd_flag")) {
     model <- tryCatch({
       svyglm(formula, design = current_design, family = quasibinomial())
     }, error = function(e) {
@@ -371,6 +391,7 @@ for(i in 1:length(outcomes)) {
       cat(" ✅ 二分类模型成功\n")
     }
   } else {
+    # 连续结局用线性回归
     model <- tryCatch({
       svyglm(formula, design = current_design)
     }, error = function(e) {
@@ -397,6 +418,7 @@ for(i in 1:length(outcomes)) {
     }
   }
 }
+# 保存结果
 if(nrow(alpha_outcome_continuous) > 0) {
   write.csv(alpha_outcome_continuous,
             file.path(results_dir, "alpha_outcome_continuous.csv"),
@@ -409,11 +431,12 @@ if(nrow(alpha_outcome_binary) > 0) {
             row.names = FALSE)
   cat("✅ 已保存二分类结果: alpha_outcome_binary.csv\n")
 }
+# 合并所有结果
 alpha_outcome_all <- bind_rows(alpha_outcome_continuous, alpha_outcome_binary)
 write.csv(alpha_outcome_all,
           file.path(results_dir, "eTable4.csv"),
           row.names = FALSE)
-cat("✅ 已保存全部结果: eTable4.csv\n\n")
+cat("✅ 已保存全部结果: eTable4.csv (包含所有疾病的完整OR和CI)\n\n")
 # ============================================================================
 # 9. 分析3：α3的独特价值（预测身心失联）
 # ============================================================================
