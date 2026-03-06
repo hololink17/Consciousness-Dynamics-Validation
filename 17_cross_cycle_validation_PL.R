@@ -244,30 +244,72 @@ table_S5 <- data.frame(
 write.csv(table_S5, file.path(RESULTS_DIR, "Table5.csv"), row.names = FALSE)
 cat(" ✅ Table S5 saved: Table5.csv\n\n")
 # ============================================================================
-# 生成Figure 5：两周期效应值对比图（代替ICC图）
+# 生成Figure 5：跨周期对比图（直接从Table 5读取）
 # ============================================================================
-# 准备数据
+# 读取Table 5（假设您的Table 5就是这个格式）
+table5 <- data.frame(
+  Metric = c(
+    "HCF_Healthy_pct",
+    "HCF_Pure_Physiological_pct",
+    "HCF_Psychological_pct",
+    "HCF_Psychosomatic_Mixed_pct",
+    "Perseveration_Depression_PHQ9",
+    "Perseveration_CRP_mgL",
+    "Alpha2_Effect_on_Depression_beta",
+    "Alpha3_Effect_on_Decoupling_OR"
+  ),
+  L_Cycle = c("28.60%", "30.20%", "12.90%", "28.30%", "10.1", "3.6", "-1.44", "0.76"),
+  P_Cycle = c("27.00%", "32.50%", "12.50%", "28.00%", "7", "3.8", "-1.27", "0.85"),
+  Consistency = c("✅", "✅", "✅", "✅", "⚠️", "✅", "✅", "✅")
+)
+# 转换为数值（去掉百分号）
 figure5_data <- data.frame(
-  Metric = c("α₂ Effect (β)", "α₃ Effect (OR)", 
-             "Perseveration Depression", "Perseveration CRP"),
-  L_cycle = c(-1.44, 0.76, 10.1, 3.6),
-  P_cycle = c(-1.27, 0.85, 7.0, 3.8)
+  Metric = c(
+    "HCF_Healthy", "HCF_Pure_Physiological", "HCF_Psychological", "HCF_Psychosomatic_Mixed",
+    "Perseveration Depression", "Perseveration CRP",
+    "α₂ Effect (β)", "α₃ Effect (OR)"
+  ),
+  Cycle_2017_2020 = c(
+    as.numeric(gsub("%", "", table5$P_Cycle[1])),  # 注意：P_Cycle是2017-2020
+    as.numeric(gsub("%", "", table5$P_Cycle[2])),
+    as.numeric(gsub("%", "", table5$P_Cycle[3])),
+    as.numeric(gsub("%", "", table5$P_Cycle[4])),
+    as.numeric(table5$P_Cycle[5]),
+    as.numeric(table5$P_Cycle[6]),
+    as.numeric(table5$P_Cycle[7]),
+    as.numeric(table5$P_Cycle[8])
+  ),
+  Cycle_2021_2023 = c(
+    as.numeric(gsub("%", "", table5$L_Cycle[1])),  # L_Cycle是2021-2023
+    as.numeric(gsub("%", "", table5$L_Cycle[2])),
+    as.numeric(gsub("%", "", table5$L_Cycle[3])),
+    as.numeric(gsub("%", "", table5$L_Cycle[4])),
+    as.numeric(table5$L_Cycle[5]),
+    as.numeric(table5$L_Cycle[6]),
+    as.numeric(table5$L_Cycle[7]),
+    as.numeric(table5$L_Cycle[8])
+  )
 )
 # 转换为长格式
+library(tidyr)
 figure5_long <- figure5_data %>%
-  pivot_longer(cols = c(L_cycle, P_cycle),
+  pivot_longer(cols = starts_with("Cycle_"),
                names_to = "Cycle",
-               values_to = "Value") %>%
-  mutate(Cycle = ifelse(Cycle == "L_cycle", "2021-2023", "2017-2020"))
+               values_to = "Value",
+               names_prefix = "Cycle_") %>%
+  mutate(Cycle = ifelse(Cycle == "2017_2020", "2017-2020", "2021-2023"))
 # 绘图
-p_compare <- ggplot(figure5_long, aes(x = Metric, y = Value, fill = Cycle)) +
-  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
-  labs(title = "Figure 5. Cross-Cycle Comparison of Key Effects",
+library(ggplot2)
+p_figure5 <- ggplot(figure5_long, aes(x = Metric, y = Value, fill = Cycle)) +
+  geom_bar(stat = "identity", position = position_dodge(0.9), width = 0.7) +
+  labs(title = "Figure 5. Cross-Cycle Comparison of Key Metrics",
        x = "", y = "Value", fill = "Cycle") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("2017-2020" = "steelblue", "2021-2023" = "coral"))
 # 保存
-ggsave(file.path(RESULTS_DIR, "Figure5.pdf"), p_compare, width = 8, height = 5)
+ggsave(file.path(RESULTS_DIR, "Figure5.pdf"), p_figure5, width = 12, height = 6)
+ggsave(file.path(RESULTS_DIR, "Figure5.png"), p_figure5, width = 12, height = 6, dpi = 300)
 # ============================================================================
 # 10. 生成验证报告
 # ============================================================================
