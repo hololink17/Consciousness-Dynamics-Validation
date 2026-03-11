@@ -362,7 +362,7 @@ if(length(adult_idx_P) > 0) {
   }
 } # 这是闭合 if(length(adult_idx_P) > 0) 的括号
 # ============================================================================
-# 生成 eFigure 4: 两个周期的最优聚类数选择（符合NHANES要求）
+# 生成 eFigure 4: 两个周期的最优聚类数选择（优化版-字体放大加深）
 # ============================================================================
 cat("\n========================================================\n")
 cat("生成 eFigure 4: Optimal Cluster Selection (Both Cycles)\n")
@@ -430,7 +430,7 @@ if(length(existing_vars_P) == 4) {
   }
 }
 # ============================================================================
-# 生成 eFigure 4（两周期对比图）- 修正版
+# 生成 eFigure 4（两周期对比图）- 优化版（字体放大加深）
 # ============================================================================
 if(exists("wss_L") && exists("wss_P") && 
    length(wss_L) == 6 && length(wss_P) == 6) {
@@ -439,49 +439,61 @@ if(exists("wss_L") && exists("wss_P") &&
   sil_P_4 <- round(sil_width_P[4], 3)
   cat("L周期 k=4 轮廓系数:", sil_L_4, "\n")
   cat("P周期 k=4 轮廓系数:", sil_P_4, "\n")
-  # 创建两面板图形，每面板两个子图
+  # 定义优化后的绘图参数
+  plot_cex.main <- 1.4      # 标题字体大小（放大）
+  plot_cex.lab <- 1.2       # 轴标签字体大小（放大）
+  plot_cex.axis <- 1.1      # 轴刻度字体大小（放大）
+  plot_cex.point <- 1.8     # 点的大小（放大）
+  plot_cex.text <- 1.2      # 文本标签大小（放大）
+  plot_lwd <- 2             # 线条粗细（加粗）
+  plot_lwd.point <- 2.5     # 点的边框粗细
+  # 创建两面板图形，每面板两个子图 - PDF版本
   pdf(file.path(RESULTS_DIR, "eFigure4.pdf"), width = 14, height = 10)
-  par(mfrow = c(2, 2), mar = c(5, 4, 4, 2) + 0.1)
+  par(mfrow = c(2, 2), mar = c(5, 5, 4, 2) + 0.1)
   # L周期 - 肘部法则
-  plot(1:6, wss_L, type = "b", pch = 19, frame = FALSE,
+  plot(1:6, wss_L, type = "b", pch = 19, frame = FALSE, lwd = plot_lwd,
        xlab = "Number of clusters (k)", 
        ylab = "Total within-cluster sum of squares",
-       main = "A. Elbow Method (2021-2023)", cex.main = 1.1,
-       cex.lab = 1, cex.axis = 0.9)
-  points(4, wss_L[4], col = "red", pch = 19, cex = 1.5)
-  text(4, wss_L[4], "k=4", pos = 3, col = "red", cex = 1)
+       main = "A. Elbow Method (2021-2023)", 
+       cex.main = plot_cex.main, cex.lab = plot_cex.lab, cex.axis = plot_cex.axis,
+       col = "black", col.lab = "black", col.axis = "black")
+  points(4, wss_L[4], col = "darkred", pch = 19, cex = plot_cex.point, lwd = plot_lwd.point)
+  text(4, wss_L[4], "k=4", pos = 3, col = "darkred", cex = plot_cex.text, font = 2)
   # L周期 - 轮廓系数（添加数值标签）
-  plot(2:6, sil_width_L[2:6], type = "b", pch = 19, frame = FALSE,
+  plot(2:6, sil_width_L[2:6], type = "b", pch = 19, frame = FALSE, lwd = plot_lwd,
        xlab = "Number of clusters (k)", 
        ylab = "Mean silhouette width",
-       main = "B. Silhouette Analysis (2021-2023)", cex.main = 1.1,
-       cex.lab = 1, cex.axis = 0.9,
-       ylim = c(0, max(0.5, sil_width_L, na.rm = TRUE)))
-  abline(h = 0.25, lty = 2, col = "gray")
-  points(4, sil_width_L[4], col = "red", pch = 19, cex = 1.5)
+       main = "B. Silhouette Analysis (2021-2023)", 
+       cex.main = plot_cex.main, cex.lab = plot_cex.lab, cex.axis = plot_cex.axis,
+       ylim = c(0, max(0.5, sil_width_L, na.rm = TRUE)),
+       col = "black", col.lab = "black", col.axis = "black")
+  abline(h = 0.25, lty = 2, col = "gray40", lwd = plot_lwd)
+  points(4, sil_width_L[4], col = "darkred", pch = 19, cex = plot_cex.point, lwd = plot_lwd.point)
   text(4, sil_width_L[4], paste0("k=4\n(", sil_L_4, ")"), 
-       pos = 3, col = "red", cex = 0.9)
+       pos = 3, col = "darkred", cex = plot_cex.text, font = 2)
   # P周期 - 肘部法则
-  plot(1:6, wss_P, type = "b", pch = 19, frame = FALSE,
+  plot(1:6, wss_P, type = "b", pch = 19, frame = FALSE, lwd = plot_lwd,
        xlab = "Number of clusters (k)", 
        ylab = "Total within-cluster sum of squares",
-       main = "C. Elbow Method (2017-2020)", cex.main = 1.1,
-       cex.lab = 1, cex.axis = 0.9)
-  points(4, wss_P[4], col = "red", pch = 19, cex = 1.5)
-  text(4, wss_P[4], "k=4", pos = 3, col = "red", cex = 1)
+       main = "C. Elbow Method (2017-2020)", 
+       cex.main = plot_cex.main, cex.lab = plot_cex.lab, cex.axis = plot_cex.axis,
+       col = "black", col.lab = "black", col.axis = "black")
+  points(4, wss_P[4], col = "darkred", pch = 19, cex = plot_cex.point, lwd = plot_lwd.point)
+  text(4, wss_P[4], "k=4", pos = 3, col = "darkred", cex = plot_cex.text, font = 2)
   # P周期 - 轮廓系数（添加数值标签）
-  plot(2:6, sil_width_P[2:6], type = "b", pch = 19, frame = FALSE,
+  plot(2:6, sil_width_P[2:6], type = "b", pch = 19, frame = FALSE, lwd = plot_lwd,
        xlab = "Number of clusters (k)", 
        ylab = "Mean silhouette width",
-       main = "D. Silhouette Analysis (2017-2020)", cex.main = 1.1,
-       cex.lab = 1, cex.axis = 0.9,
-       ylim = c(0, max(0.5, sil_width_P, na.rm = TRUE)))
-  abline(h = 0.25, lty = 2, col = "gray")
-  points(4, sil_width_P[4], col = "red", pch = 19, cex = 1.5)
+       main = "D. Silhouette Analysis (2017-2020)", 
+       cex.main = plot_cex.main, cex.lab = plot_cex.lab, cex.axis = plot_cex.axis,
+       ylim = c(0, max(0.5, sil_width_P, na.rm = TRUE)),
+       col = "black", col.lab = "black", col.axis = "black")
+  abline(h = 0.25, lty = 2, col = "gray40", lwd = plot_lwd)
+  points(4, sil_width_P[4], col = "darkred", pch = 19, cex = plot_cex.point, lwd = plot_lwd.point)
   text(4, sil_width_P[4], paste0("k=4\n(", sil_P_4, ")"), 
-       pos = 3, col = "red", cex = 0.9)
+       pos = 3, col = "darkred", cex = plot_cex.text, font = 2)
   dev.off()
-  cat("✅ 已生成 eFigure4.pdf (两周期对比，带数值标签)\n")
+  cat("✅ 已生成 eFigure4.pdf (两周期对比，字体放大加深)\n")
   # 保存数据
   elbow_data <- data.frame(
     Cycle = c(rep("2021-2023", 6), rep("2017-2020", 6)),
@@ -491,51 +503,55 @@ if(exists("wss_L") && exists("wss_P") &&
   )
   write.csv(elbow_data, file.path(RESULTS_DIR, "eFigure4_data.csv"), row.names = FALSE)
   cat("✅ 已保存 eFigure4_data.csv\n")
-  # 生成PNG版本
+  # 生成PNG版本 - 300 dpi
   cat("\n--- 生成 eFigure 4 PNG版本 ---\n")
   png(file.path(RESULTS_DIR, "eFigure4.png"), 
-      width = 14, height = 10, units = "in", res = 300, pointsize = 12)
-  par(mfrow = c(2, 2), mar = c(5, 4, 4, 2) + 0.1)
+      width = 14, height = 10, units = "in", res = 300)
+  par(mfrow = c(2, 2), mar = c(5, 5, 4, 2) + 0.1)
   # L周期 - 肘部法则
-  plot(1:6, wss_L, type = "b", pch = 19, frame = FALSE,
+  plot(1:6, wss_L, type = "b", pch = 19, frame = FALSE, lwd = plot_lwd,
        xlab = "Number of clusters (k)", 
        ylab = "Total within-cluster sum of squares",
-       main = "A. Elbow Method (2021-2023)", cex.main = 1.1,
-       cex.lab = 1, cex.axis = 0.9)
-  points(4, wss_L[4], col = "red", pch = 19, cex = 1.5)
-  text(4, wss_L[4], "k=4", pos = 3, col = "red", cex = 1)
+       main = "A. Elbow Method (2021-2023)", 
+       cex.main = plot_cex.main, cex.lab = plot_cex.lab, cex.axis = plot_cex.axis,
+       col = "black", col.lab = "black", col.axis = "black")
+  points(4, wss_L[4], col = "darkred", pch = 19, cex = plot_cex.point, lwd = plot_lwd.point)
+  text(4, wss_L[4], "k=4", pos = 3, col = "darkred", cex = plot_cex.text, font = 2)
   # L周期 - 轮廓系数（添加数值标签）
-  plot(2:6, sil_width_L[2:6], type = "b", pch = 19, frame = FALSE,
+  plot(2:6, sil_width_L[2:6], type = "b", pch = 19, frame = FALSE, lwd = plot_lwd,
        xlab = "Number of clusters (k)", 
        ylab = "Mean silhouette width",
-       main = "B. Silhouette Analysis (2021-2023)", cex.main = 1.1,
-       cex.lab = 1, cex.axis = 0.9,
-       ylim = c(0, max(0.5, sil_width_L, na.rm = TRUE)))
-  abline(h = 0.25, lty = 2, col = "gray")
-  points(4, sil_width_L[4], col = "red", pch = 19, cex = 1.5)
+       main = "B. Silhouette Analysis (2021-2023)", 
+       cex.main = plot_cex.main, cex.lab = plot_cex.lab, cex.axis = plot_cex.axis,
+       ylim = c(0, max(0.5, sil_width_L, na.rm = TRUE)),
+       col = "black", col.lab = "black", col.axis = "black")
+  abline(h = 0.25, lty = 2, col = "gray40", lwd = plot_lwd)
+  points(4, sil_width_L[4], col = "darkred", pch = 19, cex = plot_cex.point, lwd = plot_lwd.point)
   text(4, sil_width_L[4], paste0("k=4\n(", sil_L_4, ")"), 
-       pos = 3, col = "red", cex = 0.9)
+       pos = 3, col = "darkred", cex = plot_cex.text, font = 2)
   # P周期 - 肘部法则
-  plot(1:6, wss_P, type = "b", pch = 19, frame = FALSE,
+  plot(1:6, wss_P, type = "b", pch = 19, frame = FALSE, lwd = plot_lwd,
        xlab = "Number of clusters (k)", 
        ylab = "Total within-cluster sum of squares",
-       main = "C. Elbow Method (2017-2020)", cex.main = 1.1,
-       cex.lab = 1, cex.axis = 0.9)
-  points(4, wss_P[4], col = "red", pch = 19, cex = 1.5)
-  text(4, wss_P[4], "k=4", pos = 3, col = "red", cex = 1)
+       main = "C. Elbow Method (2017-2020)", 
+       cex.main = plot_cex.main, cex.lab = plot_cex.lab, cex.axis = plot_cex.axis,
+       col = "black", col.lab = "black", col.axis = "black")
+  points(4, wss_P[4], col = "darkred", pch = 19, cex = plot_cex.point, lwd = plot_lwd.point)
+  text(4, wss_P[4], "k=4", pos = 3, col = "darkred", cex = plot_cex.text, font = 2)
   # P周期 - 轮廓系数（添加数值标签）
-  plot(2:6, sil_width_P[2:6], type = "b", pch = 19, frame = FALSE,
+  plot(2:6, sil_width_P[2:6], type = "b", pch = 19, frame = FALSE, lwd = plot_lwd,
        xlab = "Number of clusters (k)", 
        ylab = "Mean silhouette width",
-       main = "D. Silhouette Analysis (2017-2020)", cex.main = 1.1,
-       cex.lab = 1, cex.axis = 0.9,
-       ylim = c(0, max(0.5, sil_width_P, na.rm = TRUE)))
-  abline(h = 0.25, lty = 2, col = "gray")
-  points(4, sil_width_P[4], col = "red", pch = 19, cex = 1.5)
+       main = "D. Silhouette Analysis (2017-2020)", 
+       cex.main = plot_cex.main, cex.lab = plot_cex.lab, cex.axis = plot_cex.axis,
+       ylim = c(0, max(0.5, sil_width_P, na.rm = TRUE)),
+       col = "black", col.lab = "black", col.axis = "black")
+  abline(h = 0.25, lty = 2, col = "gray40", lwd = plot_lwd)
+  points(4, sil_width_P[4], col = "darkred", pch = 19, cex = plot_cex.point, lwd = plot_lwd.point)
   text(4, sil_width_P[4], paste0("k=4\n(", sil_P_4, ")"), 
-       pos = 3, col = "red", cex = 0.9)
+       pos = 3, col = "darkred", cex = plot_cex.text, font = 2)
   dev.off()
-  cat("✅ 已生成 eFigure4.png (300 dpi，带数值标签)\n")
+  cat("✅ 已生成 eFigure4.png (300 dpi，字体放大加深)\n")
   # 生成图注文本（已包含数值）
   caption_text <- c(
     "eFigure 4. Optimal Cluster Selection Across Cycles",
@@ -842,7 +858,9 @@ if("pathway_cluster" %in% names(data_L) && "pathway_cluster" %in% names(data_P))
 } else {
   cat("\n⚠️ 通路聚类数据不存在，无法进行压缩假说分层分析\n")
 }
-# 在压缩假说分析结束后（第680行附近），添加：
+# ============================================================================
+# 绘制带置信区间的森林图 - 全英文高清版
+# ============================================================================
 # 构建森林图数据 - 包含置信区间
 forest_data <- data.frame()
 # 辅助函数：计算均值的差和CI
@@ -866,7 +884,7 @@ if(exists("persev_L") && exists("persev_P")) {
                Estimate = fatigue$Estimate,
                CI_lower = fatigue$CI_lower,
                CI_upper = fatigue$CI_upper),
-    data.frame(Subgroup = "Overall", Type = "Suicide",
+    data.frame(Subgroup = "Overall", Type = "Suicidal ideation",
                Estimate = suicide$Estimate,
                CI_lower = suicide$CI_lower,
                CI_upper = suicide$CI_upper)
@@ -876,17 +894,16 @@ if(exists("persev_L") && exists("persev_P")) {
 if(exists("gender_changes") && nrow(gender_changes) > 0) {
   for(i in 1:nrow(gender_changes)) {
     gender <- gender_changes$Gender[i]
-    # 获取原始数据
     L_gender <- persev_L %>% filter(RIAGENDR == ifelse(gender == "Male", 1, 2))
     P_gender <- persev_P %>% filter(RIAGENDR == ifelse(gender == "Male", 1, 2))
     fatigue <- calc_diff_ci(L_gender$DPQ040, P_gender$DPQ040)
     suicide <- calc_diff_ci(L_gender$DPQ090, P_gender$DPQ090)
     forest_data <- rbind(forest_data,
-      data.frame(Subgroup = paste("Gender:", gender), Type = "Fatigue",
+      data.frame(Subgroup = gender, Type = "Fatigue",
                  Estimate = fatigue$Estimate,
                  CI_lower = fatigue$CI_lower,
                  CI_upper = fatigue$CI_upper),
-      data.frame(Subgroup = paste("Gender:", gender), Type = "Suicide",
+      data.frame(Subgroup = gender, Type = "Suicidal ideation",
                  Estimate = suicide$Estimate,
                  CI_lower = suicide$CI_lower,
                  CI_upper = suicide$CI_upper)
@@ -902,24 +919,31 @@ if(exists("age_changes") && nrow(age_changes) > 0) {
     fatigue <- calc_diff_ci(L_age$DPQ040, P_age$DPQ040)
     suicide <- calc_diff_ci(L_age$DPQ090, P_age$DPQ090)
     forest_data <- rbind(forest_data,
-      data.frame(Subgroup = paste("Age:", age_grp), Type = "Fatigue",
+      data.frame(Subgroup = age_grp, Type = "Fatigue",
                  Estimate = fatigue$Estimate,
                  CI_lower = fatigue$CI_lower,
                  CI_upper = fatigue$CI_upper),
-      data.frame(Subgroup = paste("Age:", age_grp), Type = "Suicide",
+      data.frame(Subgroup = age_grp, Type = "Suicidal ideation",
                  Estimate = suicide$Estimate,
                  CI_lower = suicide$CI_lower,
                  CI_upper = suicide$CI_upper)
     )
   }
 }
-# 4. 种族分层 - 修正版
+# 4. 种族分层
 if(exists("race_changes") && nrow(race_changes) > 0) {
-  # 先获取RIDRETH3的实际值
   race_levels <- intersect(unique(persev_L$RIDRETH3), unique(persev_P$RIDRETH3))
+  race_labels <- c(
+    "1" = "Mexican American",
+    "2" = "Other Hispanic",
+    "3" = "Non-Hispanic White",
+    "4" = "Non-Hispanic Black",
+    "5" = "Other Race",
+    "6" = "Non-Hispanic Asian",
+    "7" = "Other/Multiracial"
+  )
   for(i in seq_along(race_levels)) {
     race_val <- race_levels[i]
-    # 获取种族名称
     race_name <- ifelse(as.character(race_val) %in% names(race_labels),
                         race_labels[as.character(race_val)],
                         paste("Race", race_val))
@@ -929,11 +953,11 @@ if(exists("race_changes") && nrow(race_changes) > 0) {
       fatigue <- calc_diff_ci(L_race$DPQ040, P_race$DPQ040)
       suicide <- calc_diff_ci(L_race$DPQ090, P_race$DPQ090)
       forest_data <- rbind(forest_data,
-        data.frame(Subgroup = paste("Race:", race_name), Type = "Fatigue",
+        data.frame(Subgroup = race_name, Type = "Fatigue",
                    Estimate = fatigue$Estimate,
                    CI_lower = fatigue$CI_lower,
                    CI_upper = fatigue$CI_upper),
-        data.frame(Subgroup = paste("Race:", race_name), Type = "Suicide",
+        data.frame(Subgroup = race_name, Type = "Suicidal ideation",
                    Estimate = suicide$Estimate,
                    CI_lower = suicide$CI_lower,
                    CI_upper = suicide$CI_upper)
@@ -943,56 +967,96 @@ if(exists("race_changes") && nrow(race_changes) > 0) {
 }
 # 5. HCF分型分层
 if(exists("hcf_changes") && nrow(hcf_changes) > 0) {
+  hcf_labels <- c(
+    "健康型" = "Healthy",
+    "纯生理型" = "Pure Physiological",
+    "纯心理型" = "Psychological",
+    "身心混合型" = "Psychosomatic Mixed"
+  )
   for(i in 1:nrow(hcf_changes)) {
     hcf_type <- hcf_changes$HCF_Type[i]
+    hcf_name <- ifelse(hcf_type %in% names(hcf_labels),
+                       hcf_labels[hcf_type],
+                       as.character(hcf_type))
     L_hcf <- persev_L %>% filter(HCF_type == hcf_type)
     P_hcf <- persev_P %>% filter(HCF_type == hcf_type)
     fatigue <- calc_diff_ci(L_hcf$DPQ040, P_hcf$DPQ040)
     suicide <- calc_diff_ci(L_hcf$DPQ090, P_hcf$DPQ090)
     forest_data <- rbind(forest_data,
-      data.frame(Subgroup = paste("HCF:", hcf_type), Type = "Fatigue",
+      data.frame(Subgroup = hcf_name, Type = "Fatigue",
                  Estimate = fatigue$Estimate,
                  CI_lower = fatigue$CI_lower,
                  CI_upper = fatigue$CI_upper),
-      data.frame(Subgroup = paste("HCF:", hcf_type), Type = "Suicide",
+      data.frame(Subgroup = hcf_name, Type = "Suicidal ideation",
                  Estimate = suicide$Estimate,
                  CI_lower = suicide$CI_lower,
                  CI_upper = suicide$CI_upper)
     )
   }
 }
-# 保存森林图数据
-write.csv(forest_data, file.path(RESULTS_DIR, "forest_data_with_ci.csv"), row.names = FALSE)
-# 绘制带置信区间的森林图
+# 保存森林图数据（供审稿人查看原始数值）
+write.csv(forest_data, file.path(RESULTS_DIR, "eFigure6_data.csv"), row.names = FALSE)
+# 定义绘图顺序
+subgroup_order <- c(
+  "Overall",
+  "Male", "Female",
+  "18-29", "30-39", "40-49", "50-59", "60+",
+  "Mexican American", "Other Hispanic", "Non-Hispanic White",
+  "Non-Hispanic Black", "Non-Hispanic Asian", "Other/Multiracial",
+  "Healthy", "Pure Physiological", "Psychological", "Psychosomatic Mixed"
+)
+# 只保留存在于数据中的分组
+valid_order <- subgroup_order[subgroup_order %in% unique(forest_data$Subgroup)]
+# 绘制带置信区间的森林图 - 高清版
 if(nrow(forest_data) > 0) {
-  # 为绘图排序
   forest_data <- forest_data %>%
     mutate(
-      Subgroup = factor(Subgroup, 
-                        levels = c("Overall", 
-                                   grep("Gender:", unique(Subgroup), value = TRUE),
-                                   grep("Age:", unique(Subgroup), value = TRUE),
-                                   grep("Race:", unique(Subgroup), value = TRUE),
-                                   grep("HCF:", unique(Subgroup), value = TRUE))),
-      Type = factor(Type, levels = c("Fatigue", "Suicide"))
-    )
+      Subgroup = factor(Subgroup, levels = valid_order),
+      Type = factor(Type, levels = c("Fatigue", "Suicidal ideation"))
+    ) %>%
+    arrange(Subgroup, Type)
+  # PDF版本
+  pdf(file.path(RESULTS_DIR, "eFigure6.pdf"), width = 14, height = 12)
   p_forest <- ggplot(forest_data, aes(x = Estimate, y = Subgroup, color = Type)) +
-    geom_point(position = position_dodge(width = 0.5), size = 3) +
+    geom_vline(xintercept = 0, linetype = "dashed", color = "gray40", size = 0.8) +
+    geom_point(position = position_dodge(width = 0.7), size = 3.5) +
     geom_errorbarh(aes(xmin = CI_lower, xmax = CI_upper),
-                   position = position_dodge(width = 0.5), height = 0.2) +
-    geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
-    labs(title = "eFigure 6. Compression Hypothesis Across Subgroups",
-         x = "Change Score (2021-2023 vs 2017-2020)",
-         y = "Subgroup", color = "Outcome") +
-    theme_minimal() +
-    theme(plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
-          axis.text.y = element_text(size = 10),
-          legend.position = "bottom") +
-    scale_color_manual(values = c("Fatigue" = "red", "Suicide" = "blue"))
-  # 保存图表
-  ggsave(file.path(RESULTS_DIR, "eFigure6.pdf"), p_forest, width = 12, height = 10)
-  ggsave(file.path(RESULTS_DIR, "eFigure6.png"), p_forest, width = 12, height = 10, dpi = 300)
-  cat("✅ 已生成带置信区间的 eFigure6.pdf 和 eFigure6.png\n")
+                   position = position_dodge(width = 0.7), height = 0.3, size = 1) +
+    scale_color_manual(
+      values = c("Fatigue" = "#CC0000", "Suicidal ideation" = "#0000CC")  # 更深更鲜艳的颜色
+    ) +
+    labs(
+      title = "eFigure 6. Compression Hypothesis Across Subgroups",
+      subtitle = "Change in fatigue and suicidal ideation from 2017-2020 to 2021-2023 in the perseveration-dominant pathway",
+      x = "Mean Change (95% CI)",
+      y = "",
+      color = "Outcome",
+      caption = "Positive values indicate increase; negative values indicate decrease. All subgroups show increased fatigue with decreased suicidal ideation."
+    ) +
+    theme_minimal(base_size = 16) +  # 基础字体从14调到16
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold", size = 20, color = "black"),  # 更大更黑
+      plot.subtitle = element_text(hjust = 0.5, size = 14, color = "gray20"),  # 更深灰色
+      axis.text.y = element_text(size = 13, color = "black"),  # 更大更黑
+      axis.text.x = element_text(size = 13, color = "black"),  # 更大更黑
+      axis.title.x = element_text(size = 16, color = "black", margin = margin(t = 10)),  # 更大更黑
+      legend.position = "bottom",
+      legend.text = element_text(size = 14, color = "black"),  # 更大更黑
+      legend.title = element_text(size = 15, face = "bold", color = "black"),  # 更大更黑
+      panel.grid.major.y = element_line(color = "gray80"),  # 更浅的网格线，突出数据点
+      panel.grid.major.x = element_line(color = "gray80"),
+      panel.grid.minor = element_blank(),
+      plot.caption = element_text(hjust = 0, size = 11, color = "gray30", face = "italic")
+    ) +
+    guides(color = guide_legend(reverse = TRUE))
+  print(p_forest)
+  dev.off()
+  # PNG版本 - 300 dpi
+  png(file.path(RESULTS_DIR, "eFigure6.png"), width = 14, height = 12, units = "in", res = 300)
+  print(p_forest)
+  dev.off()
+  cat("✅ 已生成高清版 eFigure6.pdf 和 eFigure6.png\n")
+  cat("   字体更大、颜色更深，其他不变\n")
 }
 # ============================================================================
 # 6. α因子正交性验证

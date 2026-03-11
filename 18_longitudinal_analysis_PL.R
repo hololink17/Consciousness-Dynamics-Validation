@@ -23,6 +23,17 @@ for (pkg in required_packages) {
     library(pkg, character.only = TRUE)
   }
 }
+# 自定义加权相关系数函数
+svycor <- function(formula, design) {
+  vars <- all.vars(formula)
+  # 提取数据
+  data <- model.frame(design)
+  # 计算加权协方差矩阵
+  covmat <- svyvar(as.formula(paste0("~", paste(vars, collapse = "+"))), design)
+  # 转换为相关系数矩阵
+  cor <- cov2cor(as.matrix(covmat))
+  return(list(cors = cor))
+}
 # ============================================================================
 # 英文标签定义
 # ============================================================================
@@ -244,30 +255,49 @@ apc_data <- data_combined %>%
   arrange(age_group_en, cycle)
 cat("\n年龄-时期-队列描述:\n")
 print(head(apc_data, 20))
-# 可视化年龄效应
+# 可视化年龄效应 
 age_plot_data <- data_combined %>%
   mutate(age_group_en = age_group_labels[age_group]) %>%
   group_by(age_group_en, cycle) %>%
   summarise(
     phq9 = mean(phq9_total, na.rm = TRUE),
-    se = sd(phq9_total, na.rm = TRUE) / sqrt(n())
+    se = sd(phq9_total, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
   )
+# 定义优化参数
+plot_title_size <- 16
+plot_axis_title_size <- 14
+plot_axis_text_size <- 12
+plot_legend_text_size <- 12
+plot_line_size <- 1.2
+plot_point_size <- 3
+plot_errorbar_width <- 0.3
 p_age <- ggplot(age_plot_data, aes(x = age_group_en, y = phq9, color = cycle, group = cycle)) +
-  geom_line(size = 1) +
-  geom_point(size = 2) +
-  geom_errorbar(aes(ymin = phq9 - se, ymax = phq9 + se), width = 0.2) +
+  geom_line(size = plot_line_size) +
+  geom_point(size = plot_point_size) +
+  geom_errorbar(aes(ymin = phq9 - se, ymax = phq9 + se), width = plot_errorbar_width, size = 1) +
+  scale_color_manual(values = c("2017-2020" = "#0072B2", "2021-2023" = "#D55E00")) +
   labs(title = "eFigure 1. Age-Period Effects on Depression",
        x = "Age Group", y = "PHQ-9 Total Score",
        color = "Cycle") +
-  theme_minimal() +
+  theme_minimal(base_size = 14) +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    plot.title = element_text(hjust = 0.5, face = "bold")
+    plot.title = element_text(hjust = 0.5, face = "bold", size = plot_title_size, color = "black"),
+    axis.title.x = element_text(size = plot_axis_title_size, face = "bold", color = "black"),
+    axis.title.y = element_text(size = plot_axis_title_size, face = "bold", color = "black"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = plot_axis_text_size, color = "black"),
+    axis.text.y = element_text(size = plot_axis_text_size, color = "black"),
+    legend.position = "bottom",
+    legend.title = element_text(size = plot_legend_text_size, face = "bold", color = "black"),
+    legend.text = element_text(size = plot_legend_text_size, color = "black"),
+    panel.grid.major = element_line(color = "gray80", size = 0.5),
+    panel.grid.minor = element_blank()
   )
-# 保存图表
-ggsave(file.path(RESULTS_DIR, "eFigure1.pdf"), p_age, width = 10, height = 6)
-ggsave(file.path(RESULTS_DIR, "eFigure1.png"), p_age, width = 10, height = 6, dpi = 300)
-cat("✅ 图表已保存: eFigure1.pdf/.png\n")
+# 保存图表 - PDF版本
+ggsave(file.path(RESULTS_DIR, "eFigure1.pdf"), p_age, width = 12, height = 8, dpi = 300)
+# PNG版本 - 300 dpi
+ggsave(file.path(RESULTS_DIR, "eFigure1.png"), p_age, width = 12, height = 8, dpi = 300)
+cat("✅ 已生成优化版 eFigure1.pdf 和 eFigure1.png (字体放大加深)\n")
 write.csv(apc_data, file.path(RESULTS_DIR, "eTable19.csv"), row.names = FALSE)
 cat("✅ 已保存: eTable19.csv\n")
 # ============================================================================
@@ -291,13 +321,15 @@ design_L_wt <- svydesign(
   nest = TRUE,
   data = data_L
 )
-# 从设计对象中提取数据用于预测（但保留权重信息）
+# 从设计对象中提取数据用于预测
 train_data <- data_P %>% filter(complete.cases(alpha1, alpha2, alpha3, alpha4, RIDAGEYR, RIAGENDR))
 test_data <- data_L %>% filter(complete.cases(alpha1, alpha2, alpha3, alpha4, RIDAGEYR, RIAGENDR))
+# ============================================================
+# 线性回归模型预测
+# ============================================================
 # 加权线性回归模型
 lm_model <- svyglm(phq9_total ~ alpha1 + alpha2 + alpha3 + alpha4 + RIDAGEYR + RIAGENDR,
                    design = design_P_wt)
-# 预测（需要手动计算，因为svyglm的predict需要新数据在设计对象中）
 # 提取系数
 coefs <- coef(lm_model)
 X_train <- model.matrix(~ alpha1 + alpha2 + alpha3 + alpha4 + RIDAGEYR + RIAGENDR, data = train_data)
@@ -306,12 +338,55 @@ X_test <- model.matrix(~ alpha1 + alpha2 + alpha3 + alpha4 + RIDAGEYR + RIAGENDR
 train_pred <- as.numeric(X_train %*% coefs)
 test_pred <- as.numeric(X_test %*% coefs)
 # 计算预测精度（使用加权相关系数）
-train_cor <- svycor(~train_pred + phq9_total, design = subset(design_P_wt, complete.cases(alpha1, alpha2, alpha3, alpha4)))
-test_cor <- svycor(~test_pred + phq9_total, design = subset(design_L_wt, complete.cases(alpha1, alpha2, alpha3, alpha4)))
-train_r2 <- train_cor$cors[2,1]^2
-test_r2 <- test_cor$cors[2,1]^2
+if(requireNamespace("survey", quietly = TRUE)) {
+  # 创建临时数据框
+  train_df <- data.frame(
+    train_pred = train_pred,
+    phq9_total = train_data$phq9_total,
+    SDMVPSU = train_data$SDMVPSU,
+    SDMVSTRA = train_data$SDMVSTRA,
+    WTMECPRP = train_data$WTMECPRP
+  )
+  test_df <- data.frame(
+    test_pred = test_pred,
+    phq9_total = test_data$phq9_total,
+    SDMVPSU = test_data$SDMVPSU,
+    SDMVSTRA = test_data$SDMVSTRA,
+    WTMEC2YR = test_data$WTMEC2YR
+  )
+  # 创建设计对象
+  train_design <- svydesign(
+    id = ~SDMVPSU,
+    strata = ~SDMVSTRA,
+    weights = ~WTMECPRP,
+    nest = TRUE,
+    data = train_df
+  )
+  test_design <- svydesign(
+    id = ~SDMVPSU,
+    strata = ~SDMVSTRA,
+    weights = ~WTMEC2YR,
+    nest = TRUE,
+    data = test_df
+  )
+  # 计算加权协方差矩阵
+  train_cov <- svyvar(~train_pred + phq9_total, train_design)
+  test_cov <- svyvar(~test_pred + phq9_total, test_design)
+  # 转换为相关系数
+  train_cor_val <- cov2cor(as.matrix(train_cov))[1,2]
+  test_cor_val <- cov2cor(as.matrix(test_cov))[1,2]
+  train_r2 <- train_cor_val^2
+  test_r2 <- test_cor_val^2
+} else {
+  # 如果survey包有问题，使用普通相关系数
+  train_r2 <- cor(train_pred, train_data$phq9_total, use = "complete.obs")^2
+  test_r2 <- cor(test_pred, test_data$phq9_total, use = "complete.obs")^2
+}
 cat(sprintf("\n训练集 (2017-2020) R² = %.3f\n", train_r2))
 cat(sprintf("测试集 (2021-2023) R² = %.3f\n", test_r2))
+# ============================================================
+# 逻辑回归模型预测
+# ============================================================
 # 逻辑回归模型（预测抑郁）
 glm_model <- glm(depression ~ alpha1 + alpha2 + alpha3 + alpha4 + RIDAGEYR + RIAGENDR,
                  data = train_data, family = binomial())
@@ -324,12 +399,19 @@ train_roc <- roc(train_data$depression, train_prob)
 test_roc <- roc(test_data$depression, test_prob)
 cat(sprintf("\n训练集 AUC = %.3f\n", auc(train_roc)))
 cat(sprintf("测试集 AUC = %.3f\n", auc(test_roc)))
-# 保存预测结果
+# ============================================================
+# 合并结果并保存
+# ============================================================
+# 创建结果数据框（两个模型的结果合并）
 prediction_validation <- data.frame(
-  Model = c("Linear regression", "Linear regression", "Logistic regression", "Logistic regression"),
-  Dataset = c("Training (2017-2020)", "Test (2021-2023)", "Training (2017-2020)", "Test (2021-2023)"),
-  R2_AUC = c(train_r2, test_r2, auc(train_roc), auc(test_roc))
+  Model = c("Linear regression", "Linear regression", 
+            "Logistic regression", "Logistic regression"),
+  Dataset = c("Training (2017-2020)", "Test (2021-2023)", 
+              "Training (2017-2020)", "Test (2021-2023)"),
+  R2_AUC = c(train_r2, test_r2, 
+             auc(train_roc), auc(test_roc))
 )
+# 保存结果
 write.csv(prediction_validation, file.path(RESULTS_DIR, "eTable19_prediction.csv"), row.names = FALSE)
 cat("✅ 已保存: eTable19_prediction.csv\n")
 # ============================================================================
