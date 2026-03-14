@@ -333,7 +333,7 @@ cat("✅ Table S6 saved: eTable10.csv\n")
 cat("\n========================================================\n")
 cat("8. 敏感性分析 (Table S7)\n")
 cat("========================================================\n")
-cutpoints <- c(0.5, 1, 1.5)
+cutpoints <- c(-0.5, 0, 0.5, 1)  # 加入 -0.5 和 0
 sensitivity_results <- data.frame()
 for(i in seq_along(cutpoints)) {
   cut <- cutpoints[i]

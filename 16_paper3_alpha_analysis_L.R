@@ -286,30 +286,30 @@ if("pathway_cluster" %in% names(data)) {
 cat("\n生成完整的Table 3（包含痴固着型均值）...\n")
 if(nrow(alpha_disease_results) > 0) {
   # 转换为宽格式
-table3 <- alpha_disease_results %>%
+eTable38 <- alpha_disease_results %>%
   select(System, Disease, Alpha_Factor, OR) %>%
   pivot_wider(names_from = Alpha_Factor, values_from = OR, id_cols = c(System, Disease))
   # 确保列名顺序一致
   expected_cols <- c("α₁ Metacognitive", "α₂ Emotional Regulation", 
                      "α₃ Systemic Coordination", "α₄ Goal Efficacy")
   for(col in expected_cols) {
-    if(!col %in% names(table3)) {
-      table3[[col]] <- NA
+    if(!col %in% names(eTable38)) {
+      eTable38[[col]] <- NA
     }
   }
   # 按正确顺序排列
-  table3 <- table3 %>%
+  eTable38 <- eTable38 %>%
     select(System, Disease, all_of(expected_cols))
   # 添加痴固着型均值行（使用相同的列名）
-  table3_with_persev <- bind_rows(
-    table3,
+  eTable38_with_persev <- bind_rows(
+    eTable38,
     perseveration_alphas
   )
   # 保存完整的Table 3
-  write.csv(table3_with_persev, 
-            file.path(results_dir, "Table3.csv"), 
+  write.csv(eTable38_with_persev, 
+            file.path(results_dir, "eTable38.csv"), 
             row.names = FALSE)
-  cat("✅ 完整的Table 3已保存: Table3.csv\n")
+  cat("✅ 完整的Table 3已保存: eTable38.csv\n")
 } else {
   cat("⚠️ alpha_disease_results 为空，无法生成 Table 3\n")
 }
@@ -692,10 +692,10 @@ if(nrow(system_burden) > 0) {
   print(system_burden)
 }
 # ============================================================================
-# 12. 分析6：二联中介分析（Figure 4）
+# 12. 分析6：二联中介分析（Figure 3）
 # ============================================================================
 cat("\n========================================================\n")
-cat("10. 分析6：二联中介分析（Figure 4）\n")
+cat("10. 分析6：二联中介分析（Figure 3）\n")
 cat("========================================================\n")
 # 准备中介数据 - 使用心血管疾病负担（与α3无关）
 med_data <- data %>%
@@ -776,8 +776,8 @@ if("pathway_cluster" %in% names(data)) {
     emm <- emmeans(model, ~ pathway_cluster, at = setNames(list(mean(data[[alpha]], na.rm = TRUE)), alpha))
     print(pairs(emm))
   }
-  write.csv(interaction_results, file.path(results_dir, "Table4.csv"), row.names = FALSE)
-  cat("\n✅ 已保存: Table4.csv\n")
+  write.csv(interaction_results, file.path(results_dir, "Table3.csv"), row.names = FALSE)
+  cat("\n✅ 已保存: Table3.csv\n")
   print(interaction_results)
 }
 # ============================================================================
@@ -866,10 +866,10 @@ cat(" ✅ Figure 2 saved: Figure2.pdf/.png\n")
 cat(" ✅ alpha_pathway_long.csv saved\n")
 }
 # ============================================================================
-# 16. 可视化：Figure 4 - 中介网络图（基于L周期实际数据）
+# 16. 可视化：Figure 3 - 中介网络图（基于L周期实际数据）
 # ============================================================================
 cat("\n========================================================\n")
-cat("16. 生成Figure 4 - 中介网络图（基于L周期实际数据）\n")
+cat("16. 生成Figure 3 - 中介网络图（基于L周期实际数据）\n")
 cat("========================================================\n")
 # 加载必要的包
 library(qgraph)
@@ -879,7 +879,7 @@ if (!dir.exists(results_dir)) {
   cat("✅ 创建目录:", results_dir, "\n")
 }
 cat("当前工作目录:", getwd(), "\n")
-cat("文件将保存到:", file.path(results_dir, "Figure4.pdf"), "\n\n")
+cat("文件将保存到:", file.path(results_dir, "Figure3.pdf"), "\n\n")
 # 从L周期的中介分析结果中提取数据
 if(!exists("mediation_results")) {
   cat("⚠️ 未找到mediation_results，从文件读取...\n")
@@ -965,7 +965,7 @@ layout_matrix <- matrix(c(
 # 边3 (CRP→α₂): 19.5% - 位置0.5 (中间)
 edge_label_positions <- c(0.65, 0.35, 0.5, 0.5, 0.5)
 # 绘制网络图 - PDF
-pdf(file.path(results_dir, "Figure4.pdf"), 
+pdf(file.path(results_dir, "Figure3.pdf"), 
     width = 10, height = 8,
     family = "Helvetica")
 qgraph(adj_matrix,
@@ -984,7 +984,7 @@ qgraph(adj_matrix,
        edge.label.cex = 1.4,
        edge.label.font = 2,
        edge.label.position = edge_label_positions,
-       title = paste0("Figure 4. α₂ Mediation Network\n",
+       title = paste0("Figure 3. α₂ Mediation Network\n",
                       "BMI→α₂→CVD: ", path1$mediated[1], "%; ",
                       "BMI→α₄→CVD: ", path2$mediated[1], "%; ",
                       "CRP→α₂→CVD: ", path3$mediated[1], "%"),
@@ -998,7 +998,7 @@ qgraph(adj_matrix,
        fade = FALSE,
        mar = c(8, 5, 5, 5))
 dev.off()
-cat(" ✅ Figure 4 PDF saved: Figure4.pdf\n")
+cat(" ✅ Figure 3 PDF saved: Figure3.pdf\n")
 cat("    使用 L周期数据: BMI→α₂→CVD =", path1$mediated[1], "%, ",
     "BMI→α₄→CVD =", path2$mediated[1], "%, ",
 "CRP→α₂→CVD =", path3$mediated[1], "%\n")
@@ -1016,7 +1016,7 @@ cat("Analysis time:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n\n")
 cat("一、Alpha factor descriptives\n")
 print(alpha_desc)
 cat("\n二、Alpha factors and multi-system diseases (Table 3)\n")
-if(exists("table3") && nrow(table3) > 0) print(table3)
+if(exists("eTable38") && nrow(eTable38) > 0) print(eTable38)
 cat("\n三、Alpha factors predicting health outcomes\n")
 if(exists("alpha_outcome_all") && nrow(alpha_outcome_all) > 0) print(head(alpha_outcome_all))
 cat("\n四、α3 unique value\n")

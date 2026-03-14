@@ -328,14 +328,14 @@ if(nrow(table3) > 0) {
   cat(" ✅ 表3已保存: paper1_table3_physical_outcomes.csv\n\n")
 }
 # ============================================================================
-# 9. 图1：四型生理-心理网络异质性可视化
+# 9. 图3：四型生理-心理网络异质性可视化（L周期）
 # ============================================================================
-cat("\n7. 生成图1：四型生理-心理网络异质性（双格式版）...\n")
+cat("\n7. 生成图3：四型生理-心理网络异质性（L周期）...\n")
 # 关闭所有图形设备
 graphics.off()
 # 设置输出路径
-pdf_path <- file.path(results_dir, "Figure3.pdf")
-png_path <- file.path(results_dir, "Figure3.png")
+pdf_path <- file.path(results_dir, "eFigure7.pdf")
+png_path <- file.path(results_dir, "eFigure7.png")
 # 检查并删除旧文件
 if(file.exists(pdf_path)) file.remove(pdf_path)
 if(file.exists(png_path)) file.remove(png_path)
@@ -353,30 +353,42 @@ if(require(qgraph)) {
     for(hcf in hcf_levels) {
       subset_data <- data[data$HCF_type == hcf, nodes_present, drop = FALSE]
       if(nrow(subset_data) < 10) next
-      cor_mat <- tryCatch(cor(subset_data, use = "pairwise.complete.obs"),
-                          error = function(e) NULL)
+      # 计算相关矩阵
+      cor_mat <- tryCatch({
+        cor(subset_data, use = "pairwise.complete.obs")
+      }, error = function(e) {
+        cat(sprintf("  相关矩阵计算错误: %s\n", e$message))
+        return(NULL)
+      })
       if(is.null(cor_mat)) next
-      node_colors <- ifelse(colnames(subset_data) %in% physio_nodes,
+      # 过滤弱相关（保留 |r| >= 0.2 的边）
+      cor_mat_filtered <- cor_mat
+      cor_mat_filtered[abs(cor_mat) < 0.2] <- 0
+      diag(cor_mat_filtered) <- 0
+      # 节点颜色：生理节点蓝色，心理节点红色
+      node_colors <- ifelse(colnames(cor_mat_filtered) %in% physio_nodes,
                             "lightblue", "lightcoral")
-      # 获取英文标题
-hcf_title <- hcf_names_en[hcf]  
+      # 获取英文标题并添加周期标识
+      hcf_title <- hcf_names_en[as.character(hcf)]
       if(is.na(hcf_title)) hcf_title <- as.character(hcf)
-      qgraph(cor_mat,
+      hcf_title <- paste0(hcf_title, " (2021-2023)")  # L周期标识
+      # 绘制网络图
+      qgraph(cor_mat_filtered,
              layout = "spring",
              title = hcf_title,
              color = node_colors,
              borders = TRUE,
              border.width = 1.5,
              border.color = "black",
-             labels = colnames(subset_data),
+             labels = colnames(cor_mat_filtered),
              label.cex = 1.2,
              title.cex = 1.5,
              vsize = 8,
              esize = 4,
-             edge.color = "grey50",
-             edge.width = 1.5,
-             posCol = "darkgreen",
-             negCol = "darkred",
+             edge.color = NA,        # 无边框，只保留填充色
+             edge.width = 2.0,        # 线条加粗
+             posCol = "#0000CC",      # 深蓝色 - 正相关
+             negCol = "#CC0000",      # 深红色 - 负相关
              maximum = 1,
              cut = 0.1,
              details = FALSE,
@@ -391,30 +403,41 @@ hcf_title <- hcf_names_en[hcf]
     for(hcf in hcf_levels) {
       subset_data <- data[data$HCF_type == hcf, nodes_present, drop = FALSE]
       if(nrow(subset_data) < 10) next
-      cor_mat <- tryCatch(cor(subset_data, use = "pairwise.complete.obs"),
-                          error = function(e) NULL)
+      # 计算相关矩阵
+      cor_mat <- tryCatch({
+        cor(subset_data, use = "pairwise.complete.obs")
+      }, error = function(e) {
+        return(NULL)
+      })
       if(is.null(cor_mat)) next
-      node_colors <- ifelse(colnames(subset_data) %in% physio_nodes,
+      # 过滤弱相关（保留 |r| >= 0.2 的边）
+      cor_mat_filtered <- cor_mat
+      cor_mat_filtered[abs(cor_mat) < 0.2] <- 0
+      diag(cor_mat_filtered) <- 0
+      # 节点颜色
+      node_colors <- ifelse(colnames(cor_mat_filtered) %in% physio_nodes,
                             "lightblue", "lightcoral")
-      # 获取英文标题（和PDF部分一样）
-hcf_title <- hcf_names_en[hcf] 
+      # 获取英文标题并添加周期标识
+      hcf_title <- hcf_names_en[as.character(hcf)]
       if(is.na(hcf_title)) hcf_title <- as.character(hcf)
-      qgraph(cor_mat,
+      hcf_title <- paste0(hcf_title, " (2021-2023)")
+      # 绘制网络图
+      qgraph(cor_mat_filtered,
              layout = "spring",
              title = hcf_title,
              color = node_colors,
              borders = TRUE,
              border.width = 1.5,
              border.color = "black",
-             labels = colnames(subset_data),
+             labels = colnames(cor_mat_filtered),
              label.cex = 1.2,
              title.cex = 1.5,
              vsize = 8,
              esize = 4,
-             edge.color = "grey50",
-             edge.width = 1.5,
-             posCol = "darkgreen",
-             negCol = "darkred",
+             edge.color = NA,
+             edge.width = 2.0,
+             posCol = "#0000CC",
+             negCol = "#CC0000",
              maximum = 1,
              cut = 0.1,
              details = FALSE,
@@ -423,6 +446,14 @@ hcf_title <- hcf_names_en[hcf]
     }
     dev.off()
     cat(sprintf(" ✅ PNG已保存: %s（用于快速预览）\n", png_path))
+    # 生成节点信息文件
+    node_info <- data.frame(
+      Node = nodes_present,
+      Type = ifelse(nodes_present %in% physio_nodes, "Physiological", "Psychological"),
+      Available_in_L_cycle = "Yes"
+    )
+    write.csv(node_info, file.path(results_dir, "eFigure7_nodes.csv"), row.names = FALSE)
+    cat(" ✅ 节点信息已保存: eFigure7_nodes.csv\n")
   }
 }
 # ============================================================================
@@ -531,8 +562,8 @@ if(require(qgraph) && require(igraph)) {
       }
     }
     if(nrow(network_metrics) > 0) {
-      write.csv(network_metrics, file.path(results_dir, "Figure3_data.csv"), row.names = FALSE)
-      cat(" ✅ 网络指标已保存: Figure3_data.csv\n")
+      write.csv(network_metrics, file.path(results_dir, "eFigure7_data.csv"), row.names = FALSE)
+      cat(" ✅ 网络指标已保存: eFigure7_data.csv\n")
     }
   }
 }
@@ -562,8 +593,8 @@ cat("\n四、已保存文件\n")
 cat(" 1. paper1_table1_demographics.csv\n")
 cat(" 2. paper1_table2_mental_outcomes.csv\n")
 cat(" 3. paper1_table3_physical_outcomes.csv\n")
-cat(" 4. Figure3.pdf\n")
-cat(" 5. Figure3_data.csv\n")
+cat(" 4. eFigure7.pdf\n")
+cat(" 5. eFigure7_data.csv\n")
 cat(" 6. Table4_composite.csv\n")
 sink()
 cat(" ✅ 分析报告已保存\n\n")

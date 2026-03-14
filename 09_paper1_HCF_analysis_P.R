@@ -499,14 +499,14 @@ if(all(c("depression", "diabetes", "hypertension") %in% names(data))) {
   }
 }
 # ============================================================================
-# 10. 图1：四型生理-心理网络异质性可视化（P周期修正版 - 不含alt_ui_l）
+# 10. 图3：四型生理-心理网络异质性可视化（P周期）
 # ============================================================================
-cat("8. 生成图1：四型生理-心理网络异质性（P周期）...\n")
+cat("8. 生成图3：四型生理-心理网络异质性（P周期）...\n")
 # 关闭所有图形设备
 graphics.off()
 # 设置输出路径
-pdf_path <- file.path(RESULTS_DIR, "Figure3_P.pdf")
-png_path <- file.path(RESULTS_DIR, "Figure3_P.png")
+pdf_path <- file.path(RESULTS_DIR, "eFigure7_P.pdf")
+png_path <- file.path(RESULTS_DIR, "eFigure7_P.png")
 # 检查并删除旧文件
 if(file.exists(pdf_path)) file.remove(pdf_path)
 if(file.exists(png_path)) file.remove(png_path)
@@ -532,109 +532,104 @@ if(require(qgraph)) {
     par(mfrow = c(2, 2), mar = c(2, 2, 3, 2))
     for(hcf in hcf_levels) {
       # 获取该分型的样本
-      hcf_data <- data[data$HCF_type == hcf, nodes_present, drop = FALSE]
-      if(nrow(hcf_data) < 10) {
-        cat(sprintf("  跳过 %s: 样本量太少 (%d)\n", hcf, nrow(hcf_data)))
+      subset_data <- data[data$HCF_type == hcf, nodes_present, drop = FALSE]
+      if(nrow(subset_data) < 10) {
+        cat(sprintf("  跳过 %s: 样本量太少 (%d)\n", hcf, nrow(subset_data)))
         next
       }
       # 计算相关矩阵
       cor_mat <- tryCatch({
-        # 使用pairwise.complete.obs处理缺失值
-        cor_mat <- cor(hcf_data, use = "pairwise.complete.obs")
-        # 将对角线设为0（不显示自相关）
-        diag(cor_mat) <- 0
-        # 将NA转为0（表示无相关性）
-        cor_mat[is.na(cor_mat)] <- 0
-        # 检查是否有有效相关性
-        if(all(cor_mat == 0)) {
-          cat(sprintf("  警告: %s 没有有效相关性\n", hcf))
-        }
-        cor_mat
+        cor(subset_data, use = "pairwise.complete.obs")
       }, error = function(e) {
         cat(sprintf("  相关矩阵计算错误: %s\n", e$message))
         return(NULL)
       })
       if(is.null(cor_mat)) next
+      # 过滤弱相关（保留 |r| >= 0.2 的边）
+      cor_mat_filtered <- cor_mat
+      cor_mat_filtered[abs(cor_mat) < 0.2] <- 0
+      diag(cor_mat_filtered) <- 0
       # 节点颜色：生理节点蓝色，心理节点红色
-      node_colors <- ifelse(colnames(cor_mat) %in% physio_nodes, 
+      node_colors <- ifelse(colnames(cor_mat_filtered) %in% physio_nodes,
                            "lightblue", "lightcoral")
-      # 获取英文标题
+      # 获取英文标题并添加周期标识
       hcf_title <- hcf_names_en[as.character(hcf)]
       if(is.na(hcf_title)) hcf_title <- as.character(hcf)
+      hcf_title <- paste0(hcf_title, " (2017-2020)")  # 添加周期标识
       # 绘制网络图
-      qgraph(cor_mat,
+      qgraph(cor_mat_filtered,
              layout = "spring",
              title = hcf_title,
              color = node_colors,
              borders = TRUE,
              border.width = 1.5,
              border.color = "black",
-             labels = colnames(cor_mat),
+             labels = colnames(cor_mat_filtered),
              label.cex = 1.2,
              title.cex = 1.5,
              vsize = 8,
              esize = 4,
-             edge.color = "grey50",
-             edge.width = 1.5,
-             posCol = "darkgreen",
-             negCol = "darkred",
+             edge.color = NA,        # 无边框，只保留填充色
+             edge.width = 2.0,        # 线条加粗
+             posCol = "#0000CC",      # 深蓝色 - 正相关
+             negCol = "#CC0000",      # 深红色 - 负相关
              maximum = 1,
              cut = 0.1,
              details = FALSE,
              label.scale = FALSE,
-             label.prop = 1,
-             fade = FALSE)
+             label.prop = 1)
     }
     dev.off()
     cat(sprintf("  ✅ PDF已保存: %s\n", pdf_path))
     # ========================================
-    # 生成PNG（用于快速预览和网页）
+    # 生成PNG（用于快速预览）
     # ========================================
     cat("\n  生成PNG...\n")
     png(png_path, width = 1500, height = 1200, res = 150)
     par(mfrow = c(2, 2), mar = c(2, 2, 3, 2))
     for(hcf in hcf_levels) {
-      hcf_data <- data[data$HCF_type == hcf, nodes_present, drop = FALSE]
-      if(nrow(hcf_data) < 10) next
+      subset_data <- data[data$HCF_type == hcf, nodes_present, drop = FALSE]
+      if(nrow(subset_data) < 10) next
       # 计算相关矩阵
       cor_mat <- tryCatch({
-        cor_mat <- cor(hcf_data, use = "pairwise.complete.obs")
-        diag(cor_mat) <- 0
-        cor_mat[is.na(cor_mat)] <- 0
-        cor_mat
+        cor(subset_data, use = "pairwise.complete.obs")
       }, error = function(e) {
         return(NULL)
       })
       if(is.null(cor_mat)) next
+      # 过滤弱相关（保留 |r| >= 0.2 的边）
+      cor_mat_filtered <- cor_mat
+      cor_mat_filtered[abs(cor_mat) < 0.2] <- 0
+      diag(cor_mat_filtered) <- 0
       # 节点颜色
-      node_colors <- ifelse(colnames(cor_mat) %in% physio_nodes, 
+      node_colors <- ifelse(colnames(cor_mat_filtered) %in% physio_nodes,
                            "lightblue", "lightcoral")
-      # 获取英文标题
+      # 获取英文标题并添加周期标识
       hcf_title <- hcf_names_en[as.character(hcf)]
       if(is.na(hcf_title)) hcf_title <- as.character(hcf)
+      hcf_title <- paste0(hcf_title, " (2017-2020)")
       # 绘制网络图
-      qgraph(cor_mat,
+      qgraph(cor_mat_filtered,
              layout = "spring",
              title = hcf_title,
              color = node_colors,
              borders = TRUE,
              border.width = 1.5,
              border.color = "black",
-             labels = colnames(cor_mat),
+             labels = colnames(cor_mat_filtered),
              label.cex = 1.2,
              title.cex = 1.5,
              vsize = 8,
              esize = 4,
-             edge.color = "grey50",
-             edge.width = 1.5,
-             posCol = "darkgreen",
-             negCol = "darkred",
+             edge.color = NA,        # 无边框
+             edge.width = 2.0,        # 线条加粗
+             posCol = "#0000CC",      # 深蓝色 - 正相关
+             negCol = "#CC0000",      # 深红色 - 负相关
              maximum = 1,
              cut = 0.1,
              details = FALSE,
              label.scale = FALSE,
-             label.prop = 1,
-             fade = FALSE)
+             label.prop = 1)
     }
     dev.off()
     cat(sprintf("  ✅ PNG已保存: %s\n", png_path))
@@ -643,17 +638,17 @@ if(require(qgraph)) {
     # ========================================
     node_info <- data.frame(
       Node = nodes_present,
- Type = ifelse(nodes_present %in% physio_nodes, "Physiological", "Psychological"),
+      Type = ifelse(nodes_present %in% physio_nodes, "Physiological", "Psychological"),
       Available_in_P_cycle = "Yes",
-      Notes = ifelse(nodes_present == "alt_ui_l", "Removed due to 100% missing", "")
+      Notes = ""
     )
-    write.csv(node_info, file.path(RESULTS_DIR, "Figure3_nodes_P.csv"), row.names = FALSE)
-    cat("\n  ✅ 节点信息已保存: Figure3_nodes_P.csv\n")
+    write.csv(node_info, file.path(RESULTS_DIR, "eFigure7_nodes_P.csv"), row.names = FALSE)
+    cat("\n  ✅ 节点信息已保存: eFigure7_nodes_P.csv\n")
   } else {
-    cat("  错误: 可用节点不足，无法生成图1\n")
+    cat("  错误: 可用节点不足，无法生成图3\n")
   }
 } else {
-  cat("  错误: qgraph包未加载，无法生成图1\n")
+  cat("  错误: qgraph包未加载，无法生成图3\n")
 }
 cat("\n")
 # ============================================================================
@@ -689,8 +684,8 @@ if(require(qgraph) && require(igraph)) {
       }
     }
     if(nrow(network_metrics) > 0) {
-      write.csv(network_metrics, file.path(RESULTS_DIR, "Figure3_data_P.csv"), row.names = FALSE)
-      cat(" ✅ 网络指标已保存: Figure3_data_P.csv\n")
+      write.csv(network_metrics, file.path(RESULTS_DIR, "EFIGURE7_data_P.csv"), row.names = FALSE)
+      cat(" ✅ 网络指标已保存: EFIGURE7_data_P.csv\n")
     }
   }
 }
@@ -716,9 +711,9 @@ cat("\n三、已保存文件\n")
 cat(" 1. paper1_table1_demographics_P.csv\n")
 cat(" 2. paper1_table2_mental_outcomes_P.csv\n")
 cat(" 3. paper1_table3_physical_outcomes_P.csv\n")
-cat(" 4. Figure3_P.pdf\n")
-cat(" 5. Figure3_P.png\n")
-cat(" 6. Figure3_data_P.csv\n")
+cat(" 4. EFIGURE7_P.pdf\n")
+cat(" 5. EFIGURE7_P.png\n")
+cat(" 6. EFIGURE7_data_P.csv\n")
 cat(" 7. Table4_composite_P.csv\n")
 sink()
 cat(" ✅ 分析报告已保存\n\n")
