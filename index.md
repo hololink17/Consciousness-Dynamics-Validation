@@ -14,9 +14,6 @@ This repository contains all analysis scripts for the manuscript **"Consciousnes
 
 ---
 
-## 📁 Repository Structure
-
-## 📁 Repository Structure
 
 ### 📊 Data Preparation (Scripts 01-08)
 Scripts for cleaning and merging raw NHANES data (each has `_L` and `_P` versions for two cycles).
