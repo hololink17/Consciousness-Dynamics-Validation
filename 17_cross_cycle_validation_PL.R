@@ -252,7 +252,7 @@ table_S5 <- data.frame(
 write.csv(table_S5, file.path(RESULTS_DIR, "eTable39.csv"), row.names = FALSE)
 cat(" ✅ Table S5 saved: Table5.csv\n\n")
 # ============================================================================
-# 生成Figure 5：跨周期对比图（直接从Table 5读取）
+# 生成Figure 4：跨周期对比图（直接从Table 5读取）
 # ============================================================================
 # 读取Table 5（假设您的Table 5就是这个格式）
 table5 <- data.frame(
@@ -310,7 +310,7 @@ figure5_long <- figure5_data %>%
 library(ggplot2)
 p_figure5 <- ggplot(figure5_long, aes(x = Metric, y = Value, fill = Cycle)) +
   geom_bar(stat = "identity", position = position_dodge(0.9), width = 0.7) +
-  labs(title = "Figure 5. Cross-Cycle Comparison of Key Metrics",
+  labs(title = "Figure 4. Cross-Cycle Comparison of Key Metrics",
        x = "", y = "Value", fill = "Cycle") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
