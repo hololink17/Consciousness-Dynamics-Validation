@@ -43,7 +43,7 @@ NHANES-HCF-4alpha/
 ├── 19_supplement_analysis_PL.R
 ├── 20_sensitivity_analysis_PL.R
 ├── 21_serious_research.R
-├── 22_paper1_supplement_tables.R
+├── 22_sensitivity_imputation.R
 ├── run_all.R
 ├── config.R
 ├── README.md
@@ -57,6 +57,7 @@ NHANES-HCF-4alpha/
 │       │   ├── pathway_clustering_results.rds
 │       │   ├── pathway_final_with_clusters.rds
 │       │   ├── master.rds
+│       │   ├──analysis_dataset_subset.rds	
 │       │   └── final_analysis_dataset.rds
 │       └── P_cycle/         # 2017-2020 cycle
 │           ├── alpha_factors_P.rds
@@ -64,6 +65,7 @@ NHANES-HCF-4alpha/
 │           ├── pathway_clustering_results_P.rds
 │           ├── pathway_final_with_clusters_P.rds
 │           ├── master_P.rds
+│           ├── analysis_dataset_subset_P.rds
 │           └── final_analysis_dataset_P.rds
 │
 └── outputs/                 # Generated after running (not in repo)
@@ -152,8 +154,7 @@ All outputs are saved in:
 | 09-11 | Paper 1: HCF typology analyses |
 | 12-15 | Paper 2: Pathway clustering and alpha factors |
 | 16 | Paper 3: Alpha factor validation |
-| 17-21 | Cross-cycle validation, sensitivity analyses |
-| 22 | Paper 1 supplementary tables |
+| 17-22 | Cross-cycle validation, sensitivity analyses |
 
 ---
 

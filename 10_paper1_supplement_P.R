@@ -82,13 +82,13 @@ sink(log_file, split = TRUE)
 # 3. 加载数据
 # ============================================================================
 cat("1. 加载数据...\n")
-df <- readRDS(file.path(P_DATA_DIR, "final_analysis_dataset_P.rds"))
-df <- df %>% filter(in_analysis == 1)
-# 加载健康行为变量
-health <- readRDS(file.path(P_DATA_DIR, "healthbehavior_vars_P.rds"))
-# 使用 match() 直接赋值
-df$pa_meets_guideline <- health$pa_meets_guideline[match(df$SEQN, health$SEQN)]
-df$sleep_adequate <- health$sleep_adequate[match(df$SEQN, health$SEQN)]
+# 加载数据
+data <- readRDS(file.path(P_DATA_DIR, "analysis_dataset_subset_P.rds"))
+df <- data  
+
+# 从主数据集中提取行为变量
+df$pa_meets_guideline <- data$pa_meets_guideline
+df$sleep_adequate <- data$sleep_adequate
 cat(sprintf("分析样本: %d人\n", nrow(df)))
 cat("\npa_meets_guideline 分布:\n")
 print(table(df$pa_meets_guideline, useNA = "ifany"))
@@ -132,7 +132,7 @@ mediation_results <- data.frame(
   Effect = c("Total", "Direct", "Indirect", "Prop_mediated"),
   Estimate = c(total_effect, direct_effect, indirect_effect, prop_mediated)
 )
-write.csv(mediation_results, file.path(RESULTS_DIR, "paper1_supp_table1_mediation_P.csv"), row.names = FALSE)
+write.csv(mediation_results, file.path(PAPER1_RESULTS_P_DIR, "paper1_supp_table1_mediation_P.csv"), row.names = FALSE)
 cat("✅ Table 1 (Mediation results) saved\n\n")
 # ============================================================================
 # 6. 分析2：分型特异性行为效应
@@ -193,7 +193,7 @@ if(nrow(pa_results) > 0) {
     P_value = pa_results$P_value,
     N = pa_results$N
   )
-  write.csv(pa_results_out, file.path(RESULTS_DIR, "paper1_supp_table2_pa_effects_P.csv"), row.names = FALSE)
+  write.csv(pa_results_out, file.path(PAPER1_RESULTS_P_DIR, "paper1_supp_table2_pa_effects_P.csv"), row.names = FALSE)
   cat("\n✅ Table 2 (Behavior effects) saved\n")
   # 绘图
   plot_data <- data.frame(
@@ -219,8 +219,8 @@ if(nrow(pa_results) > 0) {
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position = "none")
   # 同时保存PDF和PNG
-  ggsave(file.path(RESULTS_DIR, "paper1_figure_s1_pa_effects_P.pdf"), p, width = 8, height = 6)
-  ggsave(file.path(RESULTS_DIR, "paper1_figure_s1_pa_effects_P.png"), p, width = 8, height = 6, dpi = 300)
+  ggsave(file.path(PAPER1_RESULTS_P_DIR, "paper1_figure_s1_pa_effects_P.pdf"), p, width = 8, height = 6)
+  ggsave(file.path(PAPER1_RESULTS_P_DIR, "paper1_figure_s1_pa_effects_P.png"), p, width = 8, height = 6, dpi = 300)
   cat(" ✅ Figure S1 saved: PDF and PNG formats (P Cycle)\n")
 }
 # ============================================================================
@@ -278,7 +278,7 @@ if(nrow(biomarker_results) > 0) {
     SE = biomarker_results$SE,
     P_value = biomarker_results$P_value
   )
-  write.csv(biomarker_results_out, file.path(RESULTS_DIR, "paper1_supp_table3_biomarker_P.csv"), row.names = FALSE)
+  write.csv(biomarker_results_out, file.path(PAPER1_RESULTS_P_DIR, "paper1_supp_table3_biomarker_P.csv"), row.names = FALSE)
   cat("\n✅ Table 3 (Biomarker gradient) saved\n")
 }
 # ============================================================================
@@ -346,7 +346,7 @@ if(nrow(clinical_results) > 0) {
     CI_upper = clinical_results$CI_upper,
     P_value = clinical_results$P_value
   )
-  write.csv(clinical_results_out, file.path(RESULTS_DIR, "paper1_supp_table4_clinical_P.csv"), row.names = FALSE)
+  write.csv(clinical_results_out, file.path(PAPER1_RESULTS_P_DIR, "paper1_supp_table4_clinical_P.csv"), row.names = FALSE)
   cat("\n✅ Table 4 (Clinical outcomes) saved\n")
 }
 # ============================================================================

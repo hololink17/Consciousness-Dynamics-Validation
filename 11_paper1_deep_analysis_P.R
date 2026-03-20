@@ -69,9 +69,9 @@ cat("\n")
 # 2. 加载数据
 # ============================================================================
 cat("1. 加载数据...\n")
-data_file <- file.path(P_DATA_DIR, "final_analysis_dataset_P.rds")
+data_file <- file.path(P_DATA_DIR, "analysis_dataset_subset_P.rds")
 if(!file.exists(data_file)) {
-  stop("错误: final_analysis_dataset_P.rds 不存在")
+  stop("错误: analysis_dataset_subset_P.rds 不存在")
 }
 data_full <- readRDS(data_file)
 data <- data_full %>% filter(in_analysis == 1)
@@ -121,7 +121,7 @@ mediation_results <- data.frame(
   effect = c("Total", "Direct", "Indirect", "Prop_mediated"),
   estimate = c(total_effect, direct_effect, indirect_effect, prop_mediated)
 )
-write.csv(mediation_results, file.path(RESULTS_DIR, "paper1_deep_mediation_P.csv"), row.names = FALSE)
+write.csv(mediation_results, file.path(PAPER1_RESULTS_P_DIR, "paper1_deep_mediation_P.csv"), row.names = FALSE)
 cat("✅ 结果已保存: paper1_deep_mediation_P.csv\n\n")
 # ============================================================================
 # 5. 分析2：D层深化分析
@@ -157,7 +157,7 @@ if("HCF_D" %in% names(data) && "DMDEDUC2" %in% names(data)) {
     heart_rate = if(exists("coefs_d2")) as.data.frame(coefs_d2) else NULL,
     depression = as.data.frame(t(coefs_d3["HCF_D", ]))
   )
-  saveRDS(d_layer_results, file.path(RESULTS_DIR, "paper1_deep_Dlayer_P.rds"))
+  saveRDS(d_layer_results, file.path(PAPER1_RESULTS_P_DIR, "paper1_deep_Dlayer_P.rds"))
   cat("✅ D层分析结果已保存: paper1_deep_Dlayer_P.rds\n\n")
 }
 # ============================================================================
@@ -232,7 +232,7 @@ for(behavior_name in names(behaviors)) {
   }
 }
 if(nrow(behavior_results) > 0) {
-  write.csv(behavior_results, file.path(RESULTS_DIR, "paper1_deep_behavior_P.csv"), row.names = FALSE)
+  write.csv(behavior_results, file.path(PAPER1_RESULTS_P_DIR, "paper1_deep_behavior_P.csv"), row.names = FALSE)
   cat("\n✅ 行为因素深入分析结果已保存: paper1_deep_behavior_P.csv\n")
 }
 # ============================================================================
@@ -277,7 +277,7 @@ if(all(c("HCF_A", "HCF_C", "HCF_D", "phq9_total") %in% names(data))) {
     estimate = c(total_effect2, direct_effect2, indirect_c, indirect_d, total_indirect,
                  total_indirect / total_effect2 * 100)
   )
-  write.csv(composite_mediation, file.path(RESULTS_DIR, "paper1_deep_composite_mediation_P.csv"), row.names = FALSE)
+  write.csv(composite_mediation, file.path(PAPER1_RESULTS_P_DIR, "paper1_deep_composite_mediation_P.csv"), row.names = FALSE)
   cat("✅ 复合中介结果已保存: paper1_deep_composite_mediation_P.csv\n")
 }
 # ============================================================================
@@ -312,8 +312,8 @@ if(nrow(pa_plot_data) > 0) {
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position = "none")
   # 同时保存PDF和PNG
-ggsave(file.path(RESULTS_DIR, "paper1_figure_deep_pa_effects_P.pdf"), p1, width = 8, height = 6)
-ggsave(file.path(RESULTS_DIR, "paper1_figure_deep_pa_effects_P.png"), p1, width = 8, height = 6, dpi = 300)
+ggsave(file.path(PAPER1_RESULTS_P_DIR, "paper1_figure_deep_pa_effects_P.pdf"), p1, width = 8, height = 6)
+ggsave(file.path(PAPER1_RESULTS_P_DIR, "paper1_figure_deep_pa_effects_P.png"), p1, width = 8, height = 6, dpi = 300)
   cat("✅ 体力活动效应图已保存: PDF和PNG格式\n")
 }
 # 筛选睡眠结果
@@ -341,8 +341,8 @@ if(nrow(sleep_plot_data) > 0) {
     theme(axis.text.x = element_text(angle = 45, hjust = 1),
           legend.position = "none")
   # 同时保存PDF和PNG
-  ggsave(file.path(RESULTS_DIR, "paper1_figure_deep_sleep_effects_P.pdf"), p2, width = 8, height = 6)
-ggsave(file.path(RESULTS_DIR, "paper1_figure_deep_sleep_effects_P.png"), p2, width = 8, height = 6, dpi = 300)
+  ggsave(file.path(PAPER1_RESULTS_P_DIR, "paper1_figure_deep_sleep_effects_P.pdf"), p2, width = 8, height = 6)
+ggsave(file.path(PAPER1_RESULTS_P_DIR, "paper1_figure_deep_sleep_effects_P.png"), p2, width = 8, height = 6, dpi = 300)
   cat("✅ 睡眠效应图已保存: PDF和PNG格式\n")
 }
 }
@@ -417,9 +417,9 @@ cat(" ✅ 代码清单已保存\n")
 cat("\n========================================================\n")
 cat("✅ P周期论文1深入分析完成！\n")
 cat("完成时间:", format(Sys.time(), "%Y-%m-%d %H:%M:%S"), "\n")
-cat("结果已保存至:", RESULTS_DIR, "\n")
+cat("结果已保存至:", PAPER1_RESULTS_DIR, "\n")
 cat("========================================================\n")
 sink()
 # 清理临时变量
-rm(list = setdiff(ls(), c("P_DATA_DIR", "RESULTS_DIR", "LOGS_DIR")))
+rm(list = setdiff(ls(), c("P_DATA_DIR", "PAPER1_RESULTS_DIR", "LOGS_DIR")))
 gc()

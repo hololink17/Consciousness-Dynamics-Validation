@@ -316,8 +316,8 @@ p_figure5 <- ggplot(figure5_long, aes(x = Metric, y = Value, fill = Cycle)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   scale_fill_manual(values = c("2017-2020" = "steelblue", "2021-2023" = "coral"))
 # 保存
-ggsave(file.path(RESULTS_DIR, "Figure5.pdf"), p_figure5, width = 12, height = 6)
-ggsave(file.path(RESULTS_DIR, "Figure5.png"), p_figure5, width = 12, height = 6, dpi = 300)
+ggsave(file.path(RESULTS_DIR, "Figure4.pdf"), p_figure5, width = 12, height = 6)
+ggsave(file.path(RESULTS_DIR, "Figure4.png"), p_figure5, width = 12, height = 6, dpi = 300)
 # ============================================================================
 # 10. 生成验证报告
 # ============================================================================

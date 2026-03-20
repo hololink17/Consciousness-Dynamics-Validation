@@ -162,7 +162,7 @@ alpha_desc <- data.frame(
   Missing_Pct = sapply(alpha_vars, function(v) mean(is.na(data[[v]])) * 100)
 )
 print(alpha_desc)
-write.csv(alpha_desc, file.path(RESULTS_DIR, "alpha_descriptives_P.csv"), row.names = FALSE)
+write.csv(alpha_desc, file.path(PAPER3_RESULTS_P_DIR, "alpha_descriptives_P.csv"), row.names = FALSE)
 cat(" ✅ 描述统计已保存\n\n")
 # ============================================================================
 # 6. 定义多系统疾病结局（8大系统）
@@ -312,9 +312,9 @@ table3 <- alpha_disease_results %>%
   )
   # 保存完整的Table 3
   write.csv(table3_with_persev,
-            file.path(RESULTS_DIR, "Table3_P.csv"),
+            file.path(PAPER3_RESULTS_P_DIR, "Associations_P.csv"),
             row.names = FALSE)
-  cat("✅ 完整的Table 3已保存: Table3_P.csv\n")
+  cat("✅ 完整的Table 3已保存: Associations_P.csv\n")
   # 显示前几行确认
   cat("\nTable 3 预览:\n")
   print(head(table3_with_persev))
@@ -428,19 +428,19 @@ for(i in 1:length(outcomes)) {
 }
 if(nrow(alpha_outcome_continuous) > 0) {
   write.csv(alpha_outcome_continuous,
-            file.path(RESULTS_DIR, "alpha_outcome_continuous_P.csv"),
+            file.path(PAPER3_RESULTS_P_DIR, "alpha_outcome_continuous_P.csv"),
             row.names = FALSE)
   cat("\n✅ 已保存连续结果: alpha_outcome_continuous_P.csv\n")
 }
 if(nrow(alpha_outcome_binary) > 0) {
   write.csv(alpha_outcome_binary,
-            file.path(RESULTS_DIR, "alpha_outcome_binary_P.csv"),
+            file.path(PAPER3_RESULTS_P_DIR, "alpha_outcome_binary_P.csv"),
             row.names = FALSE)
   cat("✅ 已保存二分类结果: alpha_outcome_binary_P.csv\n")
 }
 alpha_outcome_all <- bind_rows(alpha_outcome_continuous, alpha_outcome_binary)
 write.csv(alpha_outcome_all,
-          file.path(RESULTS_DIR, "eTable4_P.csv"),
+          file.path(PAPER3_RESULTS_P_DIR, "eTable4_P.csv"),
           row.names = FALSE)
 cat("✅ 已保存全部结果: eTable4_P.csv\n\n")
 # ============================================================================
@@ -490,7 +490,7 @@ for(outcome_name in names(decoupling_outcomes)) {
   }
 }
 if(nrow(decoupling_results) > 0) {
-  write.csv(decoupling_results, file.path(RESULTS_DIR, "alpha3_decoupling_P.csv"), row.names = FALSE)
+  write.csv(decoupling_results, file.path(PAPER3_RESULTS_P_DIR, "alpha3_decoupling_P.csv"), row.names = FALSE)
   cat("\n✅ 已保存: alpha3_decoupling_P.csv\n")
   print(decoupling_results)
 }
@@ -518,7 +518,7 @@ aic_results <- data.frame(
   Delta_AIC = c(0, aic_values[2] - aic_values[1], aic_values[3] - aic_values[2])
 )
 print(aic_results)
-write.csv(aic_results, file.path(RESULTS_DIR, "aic_comparisons_P.csv"), row.names = FALSE)
+write.csv(aic_results, file.path(PAPER3_RESULTS_P_DIR, "aic_comparisons_P.csv"), row.names = FALSE)
 cat("\n【BIC比较】\n")
 bic_values <- c(
   BIC(model_step1, maximal = model_step3),
@@ -531,7 +531,7 @@ bic_results <- data.frame(
   Delta_BIC = c(0, bic_values[2] - bic_values[1], bic_values[3] - bic_values[2])
 )
 print(bic_results)
-write.csv(bic_results, file.path(RESULTS_DIR, "bic_comparisons_P.csv"), row.names = FALSE)
+write.csv(bic_results, file.path(PAPER3_RESULTS_P_DIR, "bic_comparisons_P.csv"), row.names = FALSE)
 cat("\n【嵌套模型比较】\n")
 cat("\n检验生理指标的增量贡献 (模型1 vs 模型2):\n")
 phys_vars <- c("BMXBMI", "hs_crp_mgl", "BPXOPLS1")
@@ -546,7 +546,7 @@ incremental_tests <- data.frame(
   df = c(test_phys$df, test_alpha$df),
   P_value = c(test_phys$p, test_alpha$p)
 )
-write.csv(incremental_tests, file.path(RESULTS_DIR, "incremental_tests_P.csv"), row.names = FALSE)
+write.csv(incremental_tests, file.path(PAPER3_RESULTS_P_DIR, "incremental_tests_P.csv"), row.names = FALSE)
 cat("\n【效应量比较】\n")
 n <- nrow(model_step3$data)
 df1_phys <- 3
@@ -560,7 +560,7 @@ effect_sizes <- data.frame(
   Cohen_f2 = round(c(f2_phys, f2_alpha), 4)
 )
 print(effect_sizes)
-write.csv(effect_sizes, file.path(RESULTS_DIR, "effect_sizes_P.csv"), row.names = FALSE)
+write.csv(effect_sizes, file.path(PAPER3_RESULTS_P_DIR, "effect_sizes_P.csv"), row.names = FALSE)
 cat("\n【分析4结论】\n")
 if(test_alpha$p < 0.05) {
   cat(sprintf("✅ α因子在生理指标之上具有显著的增量预测价值\n F = %.3f, p = %.4f\n", 
@@ -614,7 +614,7 @@ incremental_predictive_value <- data.frame(
 )
 # 保存增量结果（加 _P 后缀）
 write.csv(incremental_predictive_value, 
-          file.path(RESULTS_DIR, "eTable26_P.csv"),  # ✅ 加 _P
+          file.path(PAPER3_RESULTS_P_DIR, "eTable26_P.csv"),  # ✅ 加 _P
           row.names = FALSE)
 # 生成详细比较表格
 supp_table_model_comparison <- data.frame(
@@ -635,7 +635,7 @@ supp_table_model_comparison <- data.frame(
 )
 # 保存详细表格（加 _P 后缀）
 write.csv(supp_table_model_comparison, 
-          file.path(RESULTS_DIR, "eTable26_details_P.csv"),  # ✅ 加 _P
+          file.path(PAPER3_RESULTS_P_DIR, "eTable26_details_P.csv"),  # ✅ 加 _P
           row.names = FALSE)
 cat("\n✅ 增量预测价值优化分析完成\n")
 cat("   新增文件: eTable26_P.csv (包含R²增量)\n")
@@ -692,7 +692,7 @@ for(alpha in alpha_vars) {
   }
 }
 if(nrow(system_burden) > 0) {
-  write.csv(system_burden, file.path(RESULTS_DIR, "eTable5_P.csv"), row.names = FALSE)
+  write.csv(system_burden, file.path(PAPER3_RESULTS_P_DIR, "eTable5_P.csv"), row.names = FALSE)
   cat("\n✅ 已保存: eTable5_P.csv\n")
   print(system_burden)
 }
@@ -755,7 +755,7 @@ mediation_results <- bind_rows(
   parameterEstimates(fit2) %>% filter(op == ":=") %>% mutate(Model = "BMI → α₄ → CVD"),
   parameterEstimates(fit3) %>% filter(op == ":=") %>% mutate(Model = "CRP → α₂ → CVD")
 )
-write.csv(mediation_results, file.path(RESULTS_DIR, "eTable6_P.csv"), row.names = FALSE)
+write.csv(mediation_results, file.path(PAPER3_RESULTS_P_DIR, "eTable6_P.csv"), row.names = FALSE)
 cat("\n✅ 已保存: eTable6_P.csv\n")
 # ============================================================================
 # 13. 分析7：α因子与四通路的交互
@@ -781,8 +781,8 @@ if("pathway_cluster" %in% names(data)) {
     emm <- emmeans(model, ~ pathway_cluster, at = setNames(list(mean(data[[alpha]], na.rm = TRUE)), alpha))
     print(pairs(emm))
   }
-  write.csv(interaction_results, file.path(RESULTS_DIR, "Table4_P.csv"), row.names = FALSE)
-  cat("\n✅ 已保存: Table4_P.csv\n")
+  write.csv(interaction_results, file.path(PAPER3_RESULTS_P_DIR, "Table3_P.csv"), row.names = FALSE)
+  cat("\n✅ 已保存: Table3_P.csv\n")
   print(interaction_results)
 }
 # ============================================================================
@@ -806,7 +806,7 @@ if("HCF_type" %in% names(data)) {
       df = f_test$df
     ))
   }
-  write.csv(hcf_interaction, file.path(RESULTS_DIR, "eTable18_P.csv"), row.names = FALSE)
+  write.csv(hcf_interaction, file.path(PAPER3_RESULTS_P_DIR, "eTable18_P.csv"), row.names = FALSE)
   cat("\n✅ 已保存: eTable18_P.csv\n")
   print(hcf_interaction)
 }
@@ -863,10 +863,10 @@ if(file.exists(alpha_pathway_file)) {
   # 显示图形
   print(p_alpha_pathway)
   # 保存PDF - 注意用 RESULTS_DIR（大写）
-  ggsave(file.path(RESULTS_DIR, "Figure2_P.pdf"),
+  ggsave(file.path(PAPER3_RESULTS_P_DIR, "Figure2_P.pdf"),
          p_alpha_pathway, width = 10, height = 6)
   # 保存PNG - 注意用 RESULTS_DIR（大写）
-  ggsave(file.path(RESULTS_DIR, "Figure2_P.png"),
+  ggsave(file.path(PAPER3_RESULTS_P_DIR, "Figure2_P.png"),
          p_alpha_pathway, width = 10, height = 6, dpi = 300)
   cat("\n✅ Figure 2 saved: Figure2_P.pdf and .png\n")
 } else {
@@ -883,7 +883,7 @@ library(qgraph)
 # 从之前的中介分析结果中提取P周期的实际值
 if(!exists("mediation_results")) {
   cat("⚠️ 未找到mediation_results，从文件读取...\n")
-  mediation_file <- file.path(RESULTS_DIR, "eTable6_P.csv")
+  mediation_file <- file.path(PAPER3_RESULTS_P_DIR, "eTable6_P.csv")
   if(file.exists(mediation_file)) {
     mediation_results <- read.csv(mediation_file)
   } else {
@@ -965,7 +965,7 @@ layout_matrix <- matrix(c(
 # 边3 (CRP→α₂): 17.7% - 位置0.5 (中间)
 edge_label_positions <- c(0.65, 0.35, 0.5, 0.5, 0.5)
 # 绘制网络图 - PDF
-pdf(file.path(RESULTS_DIR, "Figure4_P.pdf"), 
+pdf(file.path(PAPER3_RESULTS_P_DIR, "Figure3_P.pdf"), 
     width = 10, height = 8,
     family = "Helvetica")
 qgraph(adj_matrix,

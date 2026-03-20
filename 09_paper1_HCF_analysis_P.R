@@ -233,7 +233,7 @@ for(hcf in hcf_levels) {
 }
 # 将HCF_type列的值映射为英文
 table1$HCF_type <- hcf_names_en[table1$HCF_type]
-write.csv(table1, file.path(RESULTS_DIR, "paper1_table1_demographics_P.csv"), row.names = FALSE)
+write.csv(table1, file.path(PAPER1_RESULTS_P_DIR, "paper1_table1_demographics_P.csv"), row.names = FALSE)
 cat(" ✅ 表1已保存: paper1_table1_demographics_P.csv\n\n")
 # ============================================================================
 # 7. 表2：HCF分型与心理结局的关联
@@ -317,7 +317,7 @@ for(outcome_name in names(mental_outcomes)) {
 }
 # 将HCF_type列的值映射为英文
 table2$HCF_type <- hcf_names_en[table2$HCF_type]
-write.csv(table2, file.path(RESULTS_DIR, "paper1_table2_mental_outcomes_P.csv"), row.names = FALSE)
+write.csv(table2, file.path(PAPER1_RESULTS_P_DIR, "paper1_table2_mental_outcomes_P.csv"), row.names = FALSE)
 cat(" ✅ 表2已保存: paper1_table2_mental_outcomes_P.csv\n\n")
 # ============================================================================
 # 8. 表3：HCF分型与生理结局的关联
@@ -426,7 +426,7 @@ for(outcome_name in names(physical_outcomes)) {
 if(nrow(table3) > 0) {
   # 将HCF_type列的值映射为英文
   table3$HCF_type <- hcf_names_en[table3$HCF_type]
-  write.csv(table3, file.path(RESULTS_DIR, "paper1_table3_physical_outcomes_P.csv"), row.names = FALSE)
+  write.csv(table3, file.path(PAPER1_RESULTS_P_DIR, "paper1_table3_physical_outcomes_P.csv"), row.names = FALSE)
   cat(" ✅ 表3已保存: paper1_table3_physical_outcomes_P.csv\n\n")
 }
 # ============================================================================
@@ -498,7 +498,12 @@ if(all(c("depression", "diabetes", "hypertension") %in% names(data))) {
   if(nrow(table4) > 0) {
     # 将HCF_type列的值映射为英文
     table4$HCF_type <- hcf_names_en[table4$HCF_type]
-    write.csv(table4, file.path(RESULTS_DIR, "Table4_composite_P.csv"), row.names = FALSE)
+
+# 过滤掉明显错误的OR值（完全分离导致）
+table4 <- table4 %>%
+  filter(OR < 100 | is.na(OR))
+
+    write.csv(table4, file.path(PAPER1_RESULTS_P_DIR, "paper1_table4_composite_P.csv"), row.names = FALSE)
     cat(" ✅ 表4已保存: Table4_composite_P.csv\n")
   }
 }
@@ -509,8 +514,8 @@ cat("8. 生成图3：四型生理-心理网络异质性（P周期）...\n")
 # 关闭所有图形设备
 graphics.off()
 # 设置输出路径
-pdf_path <- file.path(RESULTS_DIR, "eFigure7_P.pdf")
-png_path <- file.path(RESULTS_DIR, "eFigure7_P.png")
+pdf_path <- file.path(PAPER1_RESULTS_P_DIR, "eFigure7_P.pdf")
+png_path <- file.path(PAPER1_RESULTS_P_DIR, "eFigure7_P.png")
 # 检查并删除旧文件
 if(file.exists(pdf_path)) file.remove(pdf_path)
 if(file.exists(png_path)) file.remove(png_path)
@@ -646,7 +651,7 @@ if(require(qgraph)) {
       Available_in_P_cycle = "Yes",
       Notes = ""
     )
-    write.csv(node_info, file.path(RESULTS_DIR, "eFigure7_nodes_P.csv"), row.names = FALSE)
+    write.csv(node_info, file.path(PAPER1_RESULTS_P_DIR, "eFigure7_nodes_P.csv"), row.names = FALSE)
     cat("\n  ✅ 节点信息已保存: eFigure7_nodes_P.csv\n")
   } else {
     cat("  错误: 可用节点不足，无法生成图3\n")
@@ -688,7 +693,7 @@ if(require(qgraph) && require(igraph)) {
       }
     }
     if(nrow(network_metrics) > 0) {
-      write.csv(network_metrics, file.path(RESULTS_DIR, "EFIGURE7_data_P.csv"), row.names = FALSE)
+      write.csv(network_metrics, file.path(PAPER1_RESULTS_P_DIR, "EFIGURE7_data_P.csv"), row.names = FALSE)
       cat(" ✅ 网络指标已保存: EFIGURE7_data_P.csv\n")
     }
   }

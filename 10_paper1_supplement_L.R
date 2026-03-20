@@ -73,9 +73,11 @@ biomarker_labels <- c(
 # 2. 配置路径
 # ============================================================================
 clean_dir <- L_DATA_DIR
-results_dir <- file.path(clean_dir, "results")
+results_dir <- PAPER1_RESULTS_DIR  # 直接指向 paper1 文件夹
+
 if (!dir.exists(results_dir)) dir.create(results_dir, recursive = TRUE)
 if (!dir.exists(LOGS_DIR)) dir.create(LOGS_DIR, recursive = TRUE)
+
 # 日志
 log_file <- file.path(LOGS_DIR, paste0("10_paper1_supp_L_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log"))
 sink(log_file, split = TRUE)
@@ -83,13 +85,12 @@ sink(log_file, split = TRUE)
 # 3. 加载数据
 # ============================================================================
 cat("1. 加载数据...\n")
-df <- readRDS(file.path(clean_dir, "final_analysis_dataset.rds"))
-df <- df %>% filter(in_analysis == 1)
-# 加载健康行为变量
-health <- readRDS(file.path(clean_dir, "healthbehavior_vars.rds"))
-# 使用 match() 直接赋值
-df$pa_meets_guideline <- health$pa_meets_guideline[match(df$SEQN, health$SEQN)]
-df$sleep_adequate <- health$sleep_adequate[match(df$SEQN, health$SEQN)]
+# 加载数据
+data <- readRDS(file.path(L_DATA_DIR, "analysis_dataset_subset.rds"))
+df <- data  # 新增这行
+
+# 从主数据集中提取行为变量df$pa_meets_guideline <- data$pa_meets_guideline
+df$sleep_adequate <- data$sleep_adequate
 cat(sprintf("分析样本: %d人\n", nrow(df)))
 cat("\npa_meets_guideline 分布:\n")
 print(table(df$pa_meets_guideline, useNA = "ifany"))
