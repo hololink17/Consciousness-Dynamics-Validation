@@ -181,7 +181,7 @@ All outputs are saved in:
 
 ## 🔗 Quick Links
 
-- 📦 [GitHub Repository](https://github.com/liuxiangyu17git/Consciousness-Dynamics-Validation)
+- 📦 [GitHub Repository](https://github.com/hololink17/Consciousness-Dynamics-HCF-Validation/)
 - 📋 [OSF Preregistration](https://osf.io/ap58t/overview?view_only=1edfed21b8874a249f592cbf691bdfc3)
 
 ---
@@ -191,10 +191,3 @@ All outputs are saved in:
 MIT License — see [LICENSE](LICENSE) file for details.
 
 ---
-
-## 📬 Contact
-
-Xiangyu Liu  
-Independent Scholar  
-Email: liuxiangyu@liuxiangyu.com.cn  
-ORCID: 0009-0004-5650-7780
